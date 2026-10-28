@@ -1,0 +1,12 @@
+import * as THREE from 'three';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+export const v3=(p)=>new THREE.Vector3(...p);
+export function mesh(geo,mat,parent,name,pos=[0,0,0]){const m=new THREE.Mesh(geo,mat);m.name=name;m.position.set(...pos);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
+export function box(parent,name,size,pos,mat,r=.015){return mesh(r?new RoundedBoxGeometry(...size,2,Math.min(r,...size.map(x=>x*.3))):new THREE.BoxGeometry(...size),mat,parent,name,pos);}
+export function rod(parent,name,a,b,r,mat,segments=10){const d=v3(b).sub(v3(a));const m=mesh(new THREE.CylinderGeometry(r,r,d.length(),segments),mat,parent,name,v3(a).add(v3(b)).multiplyScalar(.5).toArray());m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());return m;}
+export function wire(parent,name,points,r,mat){const curve=new THREE.CatmullRomCurve3(points.map(v3));return mesh(new THREE.TubeGeometry(curve,Math.max(18,points.length*8),r,6,false),mat,parent,name);}
+export function roundedRect(w,h,r){const s=new THREE.Shape();const x=-w/2,y=-h/2;s.moveTo(x+r,y);s.lineTo(x+w-r,y);s.quadraticCurveTo(x+w,y,x+w,y+r);s.lineTo(x+w,y+h-r);s.quadraticCurveTo(x+w,y+h,x+w-r,y+h);s.lineTo(x+r,y+h);s.quadraticCurveTo(x,y+h,x,y+h-r);s.lineTo(x,y+r);s.quadraticCurveTo(x,y,x+r,y);return s;}
+export function frameGeometry(w,h,innerW,innerH,depth,r=.04){const s=roundedRect(w,h,r);const hole=roundedRect(innerW,innerH,Math.min(r,innerW/6));s.holes.push(new THREE.Path(hole.getPoints(6).reverse()));const g=new THREE.ExtrudeGeometry(s,{depth,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.009,bevelThickness:.009,curveSegments:5});return g;}
+export function instances(parent,name,geometry,mat,transforms){const m=new THREE.InstancedMesh(geometry,mat,transforms.length);m.name=name;const obj=new THREE.Object3D();transforms.forEach((t,i)=>{obj.position.set(...(t.p||[0,0,0]));obj.rotation.set(...(t.r||[0,0,0]));obj.scale.set(...(t.s||[1,1,1]));obj.updateMatrix();m.setMatrixAt(i,obj.matrix)});m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
+export function screws(parent,points,mat,r=.025){instances(parent,'fastener.heads',new THREE.CylinderGeometry(r,r*.86,.018,10),mat,points.map(p=>({p,r:[Math.PI/2,0,0]})));instances(parent,'fastener.slots',new THREE.BoxGeometry(r*1.25,.005,.002),new THREE.MeshStandardMaterial({color:0x353d3c,roughness:.7}),points.map(p=>({p:[p[0],p[1],p[2]+.01]})));}
+export function seeded(seed){return()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};}

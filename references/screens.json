@@ -1,0 +1,347 @@
+{
+  "source": "references/final-reference.png",
+  "source_dimensions": [
+    1374,
+    1145
+  ],
+  "source_sha256": "a5399955096e7235ec3499f71b644431ca38f02db7ffcbf8237987b6f25eeb51",
+  "corner_order": [
+    "top_left",
+    "top_right",
+    "bottom_right",
+    "bottom_left"
+  ],
+  "method": "Inverse planar homography; bicubic sampling; no denoising, sharpening or invented screen text.",
+  "notes": [
+    "Crops contain source photographic grain, reflections and unreadable generated text.",
+    "Each source crop is only tens to hundreds of pixels wide. Larger output dimensions do not add detail.",
+    "The desk display is partly occluded. Its output uses only the visible right section stretched to a square; this is an explicit placeholder, not a complete recovery.",
+    "Aspect ratios behind foreshortening are estimates, because only a single view is available."
+  ],
+  "screens": [
+    {
+      "id": "screen.upper_left",
+      "file": "textures/upper_left.png",
+      "source_quad": [
+        [
+          363,
+          193
+        ],
+        [
+          448,
+          234
+        ],
+        [
+          411,
+          348
+        ],
+        [
+          326,
+          313
+        ]
+      ],
+      "output_dimensions": [
+        512,
+        640
+      ],
+      "partial_source": false
+    },
+    {
+      "id": "screen.upper_center",
+      "file": "textures/upper_center.png",
+      "source_quad": [
+        [
+          551,
+          229
+        ],
+        [
+          815,
+          228
+        ],
+        [
+          816,
+          394
+        ],
+        [
+          550,
+          394
+        ]
+      ],
+      "output_dimensions": [
+        1024,
+        640
+      ],
+      "partial_source": false
+    },
+    {
+      "id": "screen.upper_right",
+      "file": "textures/upper_right.png",
+      "source_quad": [
+        [
+          951,
+          243
+        ],
+        [
+          1077,
+          199
+        ],
+        [
+          1104,
+          337
+        ],
+        [
+          974,
+          375
+        ]
+      ],
+      "output_dimensions": [
+        640,
+        768
+      ],
+      "partial_source": false
+    },
+    {
+      "id": "screen.center_main",
+      "file": "textures/center_main.png",
+      "source_quad": [
+        [
+          522,
+          456
+        ],
+        [
+          894,
+          456
+        ],
+        [
+          894,
+          677
+        ],
+        [
+          522,
+          677
+        ]
+      ],
+      "output_dimensions": [
+        1280,
+        768
+      ],
+      "partial_source": false
+    },
+    {
+      "id": "screen.portrait_left",
+      "file": "textures/portrait_left.png",
+      "source_quad": [
+        [
+          368,
+          452
+        ],
+        [
+          465,
+          462
+        ],
+        [
+          465,
+          709
+        ],
+        [
+          367,
+          709
+        ]
+      ],
+      "output_dimensions": [
+        384,
+        1024
+      ],
+      "partial_source": false
+    },
+    {
+      "id": "screen.left.01",
+      "file": "textures/left_01.png",
+      "source_quad": [
+        [
+          240,
+          454
+        ],
+        [
+          291,
+          467
+        ],
+        [
+          289,
+          532
+        ],
+        [
+          240,
+          523
+        ]
+      ],
+      "output_dimensions": [
+        384,
+        512
+      ],
+      "partial_source": false
+    },
+    {
+      "id": "screen.left.02",
+      "file": "textures/left_02.png",
+      "source_quad": [
+        [
+          247,
+          596
+        ],
+        [
+          311,
+          602
+        ],
+        [
+          311,
+          691
+        ],
+        [
+          247,
+          687
+        ]
+      ],
+      "output_dimensions": [
+        384,
+        512
+      ],
+      "partial_source": false
+    },
+    {
+      "id": "screen.left.03",
+      "file": "textures/left_03.png",
+      "source_quad": [
+        [
+          255,
+          761
+        ],
+        [
+          335,
+          761
+        ],
+        [
+          335,
+          871
+        ],
+        [
+          255,
+          882
+        ]
+      ],
+      "output_dimensions": [
+        384,
+        512
+      ],
+      "partial_source": false
+    },
+    {
+      "id": "screen.right.01",
+      "file": "textures/right_01.png",
+      "source_quad": [
+        [
+          1022,
+          547
+        ],
+        [
+          1094,
+          538
+        ],
+        [
+          1094,
+          611
+        ],
+        [
+          1022,
+          619
+        ]
+      ],
+      "output_dimensions": [
+        512,
+        512
+      ],
+      "partial_source": false
+    },
+    {
+      "id": "screen.right.02",
+      "file": "textures/right_02.png",
+      "source_quad": [
+        [
+          1023,
+          661
+        ],
+        [
+          1117,
+          657
+        ],
+        [
+          1117,
+          753
+        ],
+        [
+          1023,
+          752
+        ]
+      ],
+      "output_dimensions": [
+        512,
+        512
+      ],
+      "partial_source": false
+    },
+    {
+      "id": "screen.right.03",
+      "file": "textures/right_03.png",
+      "source_quad": [
+        [
+          1024,
+          809
+        ],
+        [
+          1116,
+          813
+        ],
+        [
+          1117,
+          923
+        ],
+        [
+          1024,
+          910
+        ]
+      ],
+      "output_dimensions": [
+        384,
+        512
+      ],
+      "partial_source": false
+    },
+    {
+      "id": "screen.desk",
+      "file": "textures/desk.png",
+      "source_quad": [
+        [
+          856,
+          732
+        ],
+        [
+          876,
+          732
+        ],
+        [
+          876,
+          761
+        ],
+        [
+          856,
+          761
+        ]
+      ],
+      "output_dimensions": [
+        256,
+        256
+      ],
+      "partial_source": true
+    }
+  ]
+}
