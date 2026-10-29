@@ -2,6 +2,27 @@
 
 基于 Three.js 的复古未来主义 Web 3D 交互装置。包含 12 块独立 CRT 屏幕、透明机箱与内部电子结构、完整支架和落地线束、郁金香高脚椅、缩短的透明弧形操作台、配套桌面控制台、顶部摄像头，以及手机 / iPad 实时触控台。
 
+## 已上线
+
+- 主场景：https://future-species.johnzhang569.workers.dev/
+- 移动触控台：https://future-species.johnzhang569.workers.dev/controller.html
+- GitHub 源码：https://github.com/john007076/future-species
+
+Cloudflare Workers 托管 `dist/` 静态资源，Durable Object 负责公网 WebSocket 中继、布局存储和临时媒体传输。`run_worker_first` 确保根路径的 WebSocket 升级不会被静态 `index.html` 接管。
+
+本地更新并重新部署：
+
+```bash
+npm run deploy
+git push
+```
+
+GitHub Actions 已放在 `.github/workflows/deploy.yml`。要启用推送后自动部署，需要在仓库 Settings → Secrets and variables → Actions 中配置 `CLOUDFLARE_API_TOKEN` 与 `CF_ACCOUNT_ID`；未配置时工作流会跳过部署。
+
+线上媒体上传限制为单个文件 64 MB，并在约 30 分钟后过期。布局保存在共享 Durable Object 中。当前为公开演示：知道网址的人都能控制打开中的主场景；正式展览或私人使用前，应增加 Cloudflare Access 或控制 PIN。摄像头视频只在主场景浏览器本地使用，不经过 Cloudflare 中继。
+
+已验证公网主页、触控台在线状态、跨页面屏幕选择，以及 Durable Object WebSocket 消息收发。
+
 ## 运行要求
 
 - 推荐 Node.js 22 与最新稳定版 npm。
