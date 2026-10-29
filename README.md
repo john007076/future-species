@@ -147,7 +147,7 @@ await air.reset();
 - `air-remote.html`：专用双触控板遥控页，服务于四路页面及现有四屏 AIR。remote 本身不运行 3D 或第二套生命模拟，只发送输入并显示实时状态回传。
 - 四路页面中直接拖动任一画面控制飞行，Shift + 拖动控制形态；触摸设备第一根手指控制飞行，第二根手指控制形态。
 - 渲染使用四张 2D Canvas，不创建 WebGL renderer。桌面最多 30 FPS，触摸设备最多 24 FPS；纹理分辨率保持固定，后台暂停模拟。
-- 总控制器 `controller.html` 的 SPECIAL MODE 提供 AIR VIEWS / AIR REMOTE 入口。进入四路页面时发送 `suspendScene`，暂停完整装置的 Three.js 与其他内容渲染；返回总控时恢复。
+- 总控制器 `controller.html` 的 SPECIAL MODE 提供 AIR VIEWS / AIR REMOTE 入口。AIR VIEWS 发送 `openAirViews` 指令，让主 Web 自己切换到四路画面，总控页面保持不跳转；同时暂停完整装置的 Three.js 与其他内容渲染，返回总控时恢复。
 - 专属 remote 与总控统一使用浅灰机壳、黑色按键、橙色播放态、带孔触控板和金属旋钮。五个 AIR 参数旋钮及总控旋钮均支持拖动、键盘和点击数字直接输入。
 - DISPLAY SELECT 的 `01–04` 可独立播放/暂停四路，另有 ALL ON / ALL OFF。关闭的画面停止绘制并保留最后一帧和 PAUSED 标记，生命模拟继续，重新打开时与当前状态同步。
 - 飞行与形态相位使用连续时间，不再在 `2π` 处强制取模，避免非整数频率动画产生头尾跳变。跨周期连续性已加入回归测试。

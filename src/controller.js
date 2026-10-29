@@ -53,7 +53,8 @@ $('#flip').addEventListener('click',()=>{send({type:'flip'});status('已切换�
 $('#toggle-ui').addEventListener('click',()=>{uiVisible=!uiVisible;send({type:'ui',visible:uiVisible});$('#toggle-ui').textContent=uiVisible?'SHOW UI':'PURE VIEW';});
 $('#upload').addEventListener('click',()=>$('#file').click());
 $('#file').addEventListener('change',async event=>{const file=event.target.files[0];if(!file)return;try{$('#upload').disabled=true;status(`正在传输 ${file.name}…`);const response=await fetch('./api/media',{method:'POST',headers:{'Content-Type':file.type||'application/octet-stream','X-File-Name':encodeURIComponent(file.name)},body:file});if(!response.ok)throw new Error('媒体上传失败');const media=await response.json();send({type:'upload',id:selected,url:media.url,name:media.name});status('媒体已传输到主场景');}catch(error){status(error.message);}finally{$('#upload').disabled=false;event.target.value='';}});
-for(const id of ['air-views-link','air-remote-link'])document.querySelector('#'+id).addEventListener('click',event=>{event.preventDefault();const href=event.currentTarget.href;send({type:'suspendScene',suspend:true});setTimeout(()=>location.href=href,80);});
+document.querySelector('#air-views-link').addEventListener('click',event=>{event.preventDefault();send({type:'openAirViews'});status('已让主 Web 打开四路生命画面，总控保持当前页面。');});
+document.querySelector('#air-remote-link').addEventListener('click',event=>{event.preventDefault();send({type:'suspendScene',suspend:true});setTimeout(()=>location.href='./air-remote.html',80);});
 send({type:'suspendScene',suspend:false});
 setInterval(()=>{send({type:'state'});if(lastState&&Date.now()-lastState>6500){$('#connection-dot').classList.remove('online');$('#connection-label').textContent='等待主场景';}},5000);
 send({type:'state'});render();

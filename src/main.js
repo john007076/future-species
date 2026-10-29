@@ -142,6 +142,7 @@ const dataBridge=createDataBridge({setDisplay,setContent:(id,content)=>setScreen
 async function handleRemoteControl(message){
  if(!message?.type)return;
  if(message.type==='suspendScene'){renderSuspended=!!message.suspend;lastAirTime=null;return renderSuspended;}
+ if(message.type==='openAirViews'){renderSuspended=true;location.assign('./air.html');return true;}
  if(message.type.startsWith('air'))return applyAirRemoteControl({flight:airFlight,message,onReset:resetAirFlight,onTelemetry:()=>remote?.sendState(airTelemetry(airFlight.state,airViewStates)),onViewState:setAirViewState});
  if(message.type==='select')return select(message.id);
  if(message.type==='view')return chooseView(message.name);
