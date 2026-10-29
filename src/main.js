@@ -19,6 +19,10 @@ import {createEditor} from './editor.js';
 import {createDataBridge} from './data-bridge.js';
 import {createCameraHardware} from './camera-hardware.js';
 import {createRemoteChannel} from './remote-channel.js';
+import {AIR_SCREEN_IDS,createAirSpeciesState} from './air-species-state.js';
+import {createAirSpeciesViews} from './air-species-views.js';
+import {createAirSpeciesPanel} from './air-species-panel.js';
+import {airTelemetry,applyAirRemoteControl} from './air-remote-protocol.js';
 import './style.css';
 
 const canvas=document.querySelector('#scene'),loading=document.querySelector('#loading'),loadingDetail=document.querySelector('#loading-detail');
@@ -66,6 +70,8 @@ const contentController=createContentController({screens:displayMeshes,originals
 }});
 async function setScreenContent(id,source){const texture=await contentController.setScreenContent(id,source);if(texture){displayMeshes.get(id).userData.flipBase=null;applyDisplay(id,store.snapshot().screens[id].display);}return texture;}
 let activeView='reference',selected=null,down=null,demoCanvas=null,demoId=null,cameraTransition=null,remote=null;
+const airFlight=createAirSpeciesState(),airViews=createAirSpeciesViews(),airViewStates=new Map(AIR_SCREEN_IDS.map(id=>[id,true]));
+let airReady=false,lastAirTime=null,lastAirFrame=-Infinity,lastAirTelemetry=-Infinity,renderSuspended=false;
 function broadcastState(){remote?.sendState({selected,layout:store.snapshot(),view:activeView,uiVisible:!document.body.classList.contains('ui-hidden'),cameraActive:!!localMedia.get('screen.desk')?.camera});}
 const selectionBox=new THREE.BoxHelper(new THREE.Object3D(),0xe0e2c8);selectionBox.name='selection.outline';selectionBox.material.transparent=true;selectionBox.material.opacity=.42;selectionBox.visible=false;scene.add(selectionBox);
 function fittedFov(fov){return fov*Math.max(1,(1374/1145)/(innerWidth/innerHeight));}
@@ -93,6 +99,7 @@ function pickId(object){for(let current=object;current;current=current.parent){i
 function select(id){
  if(id!==null&&!registry.has(id))throw Error('Unknown position: '+id);selected=id;const object=id?registry.get(id):null;selectionBox.visible=!!object&&!document.body.classList.contains('ui-hidden');if(object)selectionBox.setFromObject(object);
  editor.show(id,object?.userData.label||id);
+ airPanel.show(id);
  if(object){const detail={id,object,anchor:object.getWorldPosition(new THREE.Vector3()).toArray()};window.dispatchEvent(new CustomEvent('future-plan:select',{detail}));selectionListeners.forEach(listener=>listener(detail));}broadcastState();return id;
 }
 function announce(message){const toast=document.querySelector('#toast');toast.textContent=message;toast.hidden=false;clearTimeout(announce.timer);announce.timer=setTimeout(()=>toast.hidden=true,4200);}
@@ -100,9 +107,17 @@ function updateCameraButton(){const button=document.querySelector('#camera-toggl
 function updateFlipButton(value=store.snapshot().screens['screen.desk'].display.flip){const button=document.querySelector('#flip-camera');if(button)button.textContent=value?'取消反转':'反转画面';}
 function flipCameraContent(){const display=store.snapshot().screens['screen.desk'].display;return setDisplay('screen.desk',{flip:!display.flip});}
 function releaseMedia(id){const media=localMedia.get(id);if(media){media.dispose();localMedia.delete(id);if(media.camera){updateCameraButton();broadcastState();}}}
-function restoreScreenContent(id){contentController.restoreScreenContent(id);const mesh=displayMeshes.get(id);if(mesh)mesh.userData.flipBase=null;releaseMedia(id);if(demoId===id){demoId=null;demoCanvas=null;}setDisplay(id,{mode:'image'});}
+async function restoreScreenContent(id){
+ const airTexture=airViews.textures.get(id);
+ releaseMedia(id);if(demoId===id){demoId=null;demoCanvas=null;}
+ if(airTexture){
+  // A retained live texture may still carry the previous session's mirrored UVs.
+  airTexture.repeat.set(1,1);airTexture.offset.set(0,0);
+  await setScreenContent(id,airTexture);setDisplay(id,{mode:'live'});
+ }else{contentController.restoreScreenContent(id);const mesh=displayMeshes.get(id);if(mesh)mesh.userData.flipBase=null;setDisplay(id,{mode:'image'});}
+}
 function drawDemo(time){if(!demoCanvas||!demoId)return;const context=demoCanvas.getContext('2d'),width=demoCanvas.width,height=demoCanvas.height;context.fillStyle='#102b3b';context.fillRect(0,0,width,height);context.strokeStyle='#81bdc8';context.lineWidth=1;for(let i=0;i<12;i++){context.beginPath();for(let x=0;x<width;x+=4){const y=height*.5+Math.sin(x*.012+time*.0008+i*.19)*Math.sin(x/width*Math.PI)*height*.25+(i-6)*7;x?context.lineTo(x,y):context.moveTo(x,y);}context.stroke();}context.fillStyle='#e1dac0';context.font='14px monospace';context.fillText(demoId,28,32);displayMeshes.get(demoId)?.material.map && (displayMeshes.get(demoId).material.map.needsUpdate=true);}
-async function contentDemo(id){if(demoId&&demoId!==id)restoreScreenContent(demoId);releaseMedia(id);demoCanvas=document.createElement('canvas');demoCanvas.width=800;demoCanvas.height=480;demoId=id;await setScreenContent(id,demoCanvas);setDisplay(id,{mode:'live'});drawDemo(performance.now());}
+async function contentDemo(id){if(airViews.textures.has(id)){restoreScreenContent(id);return;}if(demoId&&demoId!==id)restoreScreenContent(demoId);releaseMedia(id);demoCanvas=document.createElement('canvas');demoCanvas.width=800;demoCanvas.height=480;demoId=id;await setScreenContent(id,demoCanvas);setDisplay(id,{mode:'live'});drawDemo(performance.now());}
 function fitTexture(id,texture,aspect){const spec=screens.find(item=>item.id===id),screenAspect=(spec.size[0]-spec.bezel*2)/(spec.size[1]-spec.bezel*2);texture.repeat.set(1,1);texture.offset.set(0,0);if(aspect>screenAspect){texture.repeat.x=screenAspect/aspect;texture.offset.x=(1-texture.repeat.x)/2;}else{texture.repeat.y=aspect/screenAspect;texture.offset.y=(1-texture.repeat.y)/2;}texture.needsUpdate=true;}
 async function uploadContent(id,file){if(demoId===id){demoId=null;demoCanvas=null;}const media=await createLocalMedia(file);fitTexture(id,media.texture,media.aspect);await setScreenContent(id,media.texture);releaseMedia(id);localMedia.set(id,media);setDisplay(id,{mode:media.video?'video':'image'});broadcastState();return media;}
 async function setMode(id,mode){if(mode==='image')restoreScreenContent(id);else if(mode==='live')await contentDemo(id);else setDisplay(id,{mode});}
@@ -120,9 +135,14 @@ async function toggleCamera(){
 const editor=createEditor({specs:screens,store,onTransform:applyTransform,onDisplay:setDisplay,onMode:(id,mode)=>setMode(id,mode).catch(error=>editor.say(error.message,true)),onUpload:uploadContent,onDemo:id=>contentDemo(id).catch(error=>editor.say(error.message,true)),onRestore:restoreScreenContent,onReset:id=>{const spec=screens.find(item=>item.id===id)||hardwareSpecs.find(item=>item.id===id);if(spec)applyTransform(id,{position:[...spec.position],rotation:[...spec.rotation]});},onSaveProject:async()=>{
  const response=await fetch('./api/layout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(store.snapshot())});if(!response.ok)throw new Error('项目写入仅在 npm run dev 下可用；静态部署请使用“导出 JSON”。');
 },onImport:layout=>{store.replace(layout);const state=store.snapshot();for(const spec of screens){applyTransform(spec.id,state.screens[spec.id],false);applyDisplay(spec.id,state.screens[spec.id].display);}for(const spec of hardwareSpecs)applyTransform(spec.id,state.hardware[spec.id],false);editor.sync();}});
+async function setAirViewState(id,enabled){if(!airViewStates.has(id))return;airViewStates.set(id,enabled);if(enabled)await setScreenContent(id,airViews.textures.get(id));setDisplay(id,{mode:enabled?'live':'blank'});remote?.sendState(airTelemetry(airFlight.state,airViewStates));}
+async function resetAirFlight(){airFlight.reset();for(const id of AIR_SCREEN_IDS)airViewStates.set(id,true);await Promise.all(AIR_SCREEN_IDS.filter(id=>displayMeshes.has(id)).map(restoreScreenContent));airViews.render(airFlight.state);airPanel.update(airFlight.state);}
+const airPanel=createAirSpeciesPanel({flight:airFlight,onReset:resetAirFlight});
 const dataBridge=createDataBridge({setDisplay,setContent:(id,content)=>setScreenContent(id,content?.url||content),onError:error=>editor.say(error.message,true)});
 async function handleRemoteControl(message){
  if(!message?.type)return;
+ if(message.type==='suspendScene'){renderSuspended=!!message.suspend;lastAirTime=null;return renderSuspended;}
+ if(message.type.startsWith('air'))return applyAirRemoteControl({flight:airFlight,message,onReset:resetAirFlight,onTelemetry:()=>remote?.sendState(airTelemetry(airFlight.state,airViewStates)),onViewState:setAirViewState});
  if(message.type==='select')return select(message.id);
  if(message.type==='view')return chooseView(message.name);
  if(message.type==='transform')return applyTransform(message.id,message.patch);
@@ -139,16 +159,16 @@ async function handleRemoteControl(message){
  if(message.type==='upload'){const response=await fetch(message.url);if(!response.ok)throw new Error('移动端媒体传输失败。');const blob=await response.blob(),file=new File([blob],decodeURIComponent(message.name||'media'),{type:blob.type});return uploadContent(message.id,file);}
 }
 remote=createRemoteChannel({onControl:message=>handleRemoteControl(message).catch(error=>{editor.say(error.message,true);announce(error.message);})});
-const raycaster=new THREE.Raycaster();canvas.addEventListener('pointerdown',event=>down={x:event.clientX,y:event.clientY});canvas.addEventListener('pointercancel',()=>down=null);canvas.addEventListener('pointerup',event=>{if(!down)return;if(Math.hypot(event.clientX-down.x,event.clientY-down.y)<=5){const rect=canvas.getBoundingClientRect();raycaster.setFromCamera(new THREE.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),camera);const hit=raycaster.intersectObjects([...registry.values()],true).find(item=>pickId(item.object));select(hit?pickId(hit.object):null);}down=null;});
+const raycaster=new THREE.Raycaster();canvas.addEventListener('pointerdown',event=>down={x:event.clientX,y:event.clientY});canvas.addEventListener('pointercancel',()=>down=null);canvas.addEventListener('pointerup',event=>{if(!down)return;if(Math.hypot(event.clientX-down.x,event.clientY-down.y)<=5){const rect=canvas.getBoundingClientRect();raycaster.setFromCamera(new THREE.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),camera);const displayHit=raycaster.intersectObjects([...displayMeshes.values()],false)[0];const hit=displayHit||raycaster.intersectObjects([...registry.values()],true).find(item=>pickId(item.object));select(hit?pickId(hit.object):null);}down=null;});
 canvas.addEventListener('future-plan:clear-selection',()=>select(null));
 document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>chooseView(button.dataset.view)));
-function setUIVisible(visible){document.body.classList.toggle('ui-hidden',!visible);selectionBox.visible=!!selected&&visible;broadcastState();}
+function setUIVisible(visible){document.body.classList.toggle('ui-hidden',!visible);selectionBox.visible=!!selected&&visible;airPanel.show(visible?selected:null);if(!visible){airFlight.releaseInput();airFlight.releaseFieldInput();}broadcastState();}
 document.querySelector('#hide-ui').addEventListener('click',()=>setUIVisible(false));
 document.querySelector('#camera-toggle').addEventListener('click',()=>toggleCamera().catch(error=>{announce(error.message);editor.say(error.message,true);}));
 document.querySelector('#flip-camera').addEventListener('click',flipCameraContent);
 addEventListener('keydown',event=>{if(event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement)return;const view=['reference','front','left','right','back','top','seat'][Number(event.key)-1];if(view)chooseView(view);if(event.key.toLowerCase()==='h')setUIVisible(document.body.classList.contains('ui-hidden'));if(event.key==='Escape')select(null);});
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.fov=fittedFov(views[activeView]?.fov||camera.fov);camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight);});
-document.addEventListener('visibilitychange',()=>{for(const media of localMedia.values()){if(media.video){if(document.hidden)media.video.pause();else media.video.play().catch(()=>{});}}});
+document.addEventListener('visibilitychange',()=>{lastAirTime=null;if(document.hidden){airFlight.releaseInput();airFlight.releaseFieldInput();}for(const media of localMedia.values()){if(media.video){if(document.hidden)media.video.pause();else media.video.play().catch(()=>{});}}});
 async function boot(){
  try{
   setBootProgress(8,'读取场景与独立屏幕配置…');
@@ -161,6 +181,9 @@ async function boot(){
    const spec={...base,...screenDesign[base.id],...state.screens[base.id]},texture=await loadTexture(import.meta.env.BASE_URL+'textures/'+base.texture+'.png'),root=createScreen(spec,mats,texture);installation.add(root);register(root);const display=root.getObjectByName('displaySurface');displayMeshes.set(base.id,display);originalMaps.set(base.id,texture);applyDisplay(base.id,spec.display);return root;
   }));
   if(displayMeshes.size!==12)throw Error('Expected 12 screens');
+  airViews.render(airFlight.state);
+  for(const id of AIR_SCREEN_IDS){await setScreenContent(id,airViews.textures.get(id));if(state.screens[id].display.mode!=='blank')setDisplay(id,{mode:'live'});}
+  airReady=true;
   setBootProgress(84,'连接支架、线缆与落地线束…');
   scene.updateMatrixWorld(true);mounts=createMounts(mats,registry);installation.add(mounts.root);mounts.updateAll();
   setBootProgress(91,'预编译玻璃、CRT 与后期着色器…');
@@ -172,10 +195,13 @@ async function boot(){
  }catch(error){fatal('资源或 WebGL 场景加载失败：'+error.message);console.error(error);return false;}
 }
 const ready=boot().then(result=>{if(result)broadcastState();return result;});
+const airSpecies={screenIds:[...AIR_SCREEN_IDS],setInput:airFlight.setInput,releaseInput:airFlight.releaseInput,setFieldInput:airFlight.setFieldInput,releaseFieldInput:airFlight.releaseFieldInput,setParameters:airFlight.setParameters,reset:resetAirFlight,snapshot:airFlight.snapshot,diagnostics(){return{...airViews.diagnostics?.(),channels:AIR_SCREEN_IDS.map(id=>({id,attached:displayMeshes.get(id)?.material.map===airViews.textures.get(id),mode:store.snapshot().screens[id].display.mode})),state:airFlight.snapshot()};}};
 window.futurePlan={ready,scene,camera,renderer,controls,registry,screens:displayMeshes,materials:mats,settings:sceneSettings,layout:store,setView:chooseView,select,onSelect(listener){if(typeof listener!=='function')throw new TypeError('callback must be a function');selectionListeners.add(listener);return()=>selectionListeners.delete(listener);},getObject:id=>registry.get(id),getAnchor(id){const object=registry.get(id);if(!object)throw Error('Unknown position: '+id);return object.getWorldPosition(new THREE.Vector3()).toArray();},setScreenTransform:applyTransform,setScreenDisplay:setDisplay,setScreenContent,restoreScreenContent,contentDemo,toggleCamera,remoteControl:handleRemoteControl,connectDataChannel:dataBridge.connect,applyData:dataBridge.apply,setUIVisible,capture(){composer.render();return canvas.toDataURL('image/png');},diagnostics(){let meshes=0,transparent=0;scene.traverse(object=>{if(object.isMesh)meshes++;if(object.material?.transmission>0)transparent++;});return{screenCount:displayMeshes.size,interactiveIds:[...registry.keys()],meshes,transparentParts:transparent,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,view:activeView,selected,mounts:mounts?.diagnostics(),layout:store.snapshot(),renderer:renderer.getContext().getParameter(renderer.getContext().RENDERER),canvas:[canvas.width,canvas.height]};}};
 renderer.setAnimationLoop(time=>{
- if(document.hidden)return;
+ if(document.hidden||renderSuspended){lastTime=null;lastAirTime=null;return;}
+ if(airReady){const dt=lastAirTime===null?0:Math.min((time-lastAirTime)/1000,.1);lastAirTime=time;airFlight.step(dt);if(time-lastAirFrame>=1000/30){airViews.render(airFlight.state,id=>airViewStates.get(id));airPanel.update(airFlight.state);lastAirFrame=time;}if(time-lastAirTelemetry>100){remote?.sendState(airTelemetry(airFlight.state,airViewStates));lastAirTelemetry=time;}}
  if(cameraTransition){const progress=Math.min(1,(time-cameraTransition.startTime)/cameraTransition.duration),ease=progress<.5?4*progress**3:1-(-2*progress+2)**3/2;camera.position.lerpVectors(cameraTransition.from.position,cameraTransition.to.position,ease);controls.target.lerpVectors(cameraTransition.from.target,cameraTransition.to.target,ease);camera.fov=THREE.MathUtils.lerp(cameraTransition.from.fov,cameraTransition.to.fov,ease);camera.updateProjectionMatrix();if(progress===1)cameraTransition=null;}
  controls.update();drawDemo(time);if(selectionBox.visible)selectionBox.setFromObject(registry.get(selected));renderer.info.reset();composer.render();
 });
-addEventListener('beforeunload',()=>{dataBridge.close();for(const id of localMedia.keys())releaseMedia(id);});
+window.futurePlan.airSpecies=airSpecies;
+addEventListener('beforeunload',()=>{dataBridge.close();airPanel.dispose();airViews.dispose();for(const id of localMedia.keys())releaseMedia(id);});

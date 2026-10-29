@@ -2,15 +2,19 @@ const CONTROL='future-species:control',STATE='future-species:state';
 
 export function createRemoteChannel({onControl=()=>{},onState=()=>{}}){
  const hot=import.meta.hot,bus='BroadcastChannel'in globalThis?new BroadcastChannel('future-species-remote'):null;
- let socket=null;
+ let socket=null,reconnectTimer=null,closed=false;
  function receive(event,payload){if(event===CONTROL)onControl(payload);if(event===STATE)onState(payload);}
  if(hot){hot.on(CONTROL,onControl);hot.on(STATE,onState);}
- else if(location.host){
+ function connect(){
+  if(closed||hot||!location.host)return;
   try{
-   socket=new WebSocket(`${location.protocol==='https:'?'wss':'ws'}://${location.host}`,'vite-hmr');
-   socket.addEventListener('message',event=>{try{const message=JSON.parse(event.data);if(message.type==='custom')receive(message.event,message.data);}catch{}});
-  }catch{}
+   const next=new WebSocket(`${location.protocol==='https:'?'wss':'ws'}://${location.host}`,'vite-hmr');socket=next;
+   next.addEventListener('message',event=>{try{const message=JSON.parse(event.data);if(message.type==='custom')receive(message.event,message.data);}catch{}});
+   next.addEventListener('close',()=>{if(socket===next){socket=null;if(!closed)reconnectTimer=setTimeout(connect,1500);}});
+   next.addEventListener('error',()=>next.close());
+  }catch{reconnectTimer=setTimeout(connect,2000);}
  }
+ if(!hot)connect();
  bus?.addEventListener('message',event=>receive(event.data?.event,event.data?.payload));
  function send(event,payload){
   if(hot){hot.send(event,payload);return;}
@@ -18,7 +22,7 @@ export function createRemoteChannel({onControl=()=>{},onState=()=>{}}){
   bus?.postMessage({event,payload});
  }
  return {
-  mode:hot?'vite-websocket':socket?'websocket':'broadcast',sendControl:payload=>send(CONTROL,payload),sendState:payload=>send(STATE,payload),
-  close(){bus?.close();socket?.close();},
+  mode:hot?'vite-websocket':'websocket',sendControl:payload=>send(CONTROL,payload),sendState:payload=>send(STATE,payload),
+  close(){closed=true;clearTimeout(reconnectTimer);bus?.close();socket?.close();socket=null;},
  };
 }

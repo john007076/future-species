@@ -6,6 +6,8 @@
 
 - 主场景：https://future-species.johnzhang569.workers.dev/
 - 移动触控台：https://future-species.johnzhang569.workers.dev/controller.html
+- 四路生命画面：https://future-species.johnzhang569.workers.dev/air.html
+- AIR 专属控制器：https://future-species.johnzhang569.workers.dev/air-remote.html
 - GitHub 源码：https://github.com/john007076/future-species
 
 Cloudflare Workers 托管 `dist/` 静态资源，Durable Object 负责公网 WebSocket 中继、布局存储和临时媒体传输。`run_worker_first` 确保根路径的 WebSocket 升级不会被静态 `index.html` 接管。
@@ -90,6 +92,74 @@ npm run preview
 布局同时保存在浏览器 `localStorage`。本地上传的图片和视频只在当前会话有效，刷新后恢复项目占位内容；摄像头不会自动启动。
 
 ## 十二屏统一配置
+
+### AIR SPECIES / SP-01（本地实时版本）
+
+点击以下任一屏幕，左侧打开 AIR SPECIES 面板，右侧继续保留硬件编辑。透明机箱后可见的显示面优先接收屏幕选择，避免机箱抢走点击。
+
+| 真实屏幕 ID | 内容 |
+| --- | --- |
+| `screen.upper_left` | 主飞行场景 |
+| `screen.portrait_left` | 同一生物的羽枝与身体微距 |
+| `screen.left.02` | 气流、速度和信号 |
+| `screen.left.03` | 最近 9 秒轨迹与位置残影 |
+
+其余八屏的内容不变，包括中央右侧摄像头专用 `screen.desk`。原始纹理文件保留。
+
+- XY Pad 使用 Pointer Events 与 pointer capture，X/Y 范围为 `[-1,1]`；上下改变飞行高度，左右改变位置。支持鼠标、触控板和触摸事件，也支持方向键与 Home。
+- Motion Response 控制响应，Feather Dynamics 控制羽枝延迟和变形，Drift 控制自主漂移。松手后保留速度，约 3.2 秒内从滑行过渡到自主漂浮；失焦、隐藏界面或切换到其他屏幕会释放面板输入。
+- Reset Flight 重置飞行状态、三项参数和轨迹，并恢复四块 AIR 屏的实时内容。硬件位置、角度、亮度和其他屏幕不受影响。
+- 27 组曲线羽枝与次级纤维程序化生成身体；没有眼睛、鸟脸或机械部件。四个 CanvasTexture 直接接入原屏幕材质的 map/emissiveMap，微距使用同一帧生物的局部裁切。没有前景 DOM 生物图像。
+- 生命模拟使用 120Hz 固定步长，四路纹理最多更新 30 次/秒；纹理最大为 640×552 / 384×960 / 384×452 / 384×456。轨迹采样为 20Hz、最多 180 点，页面后台暂停模拟。
+- 右侧上传、空白、显示参数和角度编辑仍可使用；AIR 屏的“实时纹理”和“还原内容”恢复该屏的 AIR 内容。已保存的空白状态在刷新后保留。
+
+实现文件：`src/air-species-state.js`、`src/air-species-views.js`、`src/air-species-panel.js`、`src/air-species.css`；`src/main.js` 负责接入，`src/config.js` 仅更新四屏内容标签。
+
+### 双触控板 / Morph Field 更新（2026-10-30）
+
+- 第一块 **FLIGHT FIELD** 控制全局飞行位置和高度；第二块 **MORPH FIELD** 控制身体局部吸附位置。按住产生吸附，移动带动涡旋与延迟，松开后约 4–6 秒逐渐消散。两路输入独立，支持多触点分别操作（真实双指设备仍待验证）。
+- **Attraction** 调节吸附强度，**Fluidity** 调节流动性、回弹与耗散；原 Motion Response、Feather Dynamics、Drift 位于 **Flight Tuning**。
+- 三个相互融合的标量场波瓣生成半透明薄膜，并作用于真实羽枝曲线的位置、卷曲和深度；身体的呼吸、扭转和前后层次也增强。它是用于实时视觉的场形变，不是不可压缩流体求解器。
+- 四路仍共用同一生命与形态状态，气流屏同时显示吸附与涡旋变化。`src/air-species-field.js` 提供共享场函数，`tests/air-species-field.test.js` 检查密度连续性、局部变形与旋向。
+- 输入接口新增 `air.setFieldInput({x:0.3,y:0.2,source:'leap'})` 和 `air.releaseFieldInput()`。隐藏界面、切换非 AIR 屏幕和 Reset 会释放面板捕获；页面后台释放两路外部输入。
+
+预留手部追踪适配接口（未接入真实 Leap Motion 设备）：
+
+```js
+await window.futurePlan.ready;
+const air = window.futurePlan.airSpecies;
+air.setInput({x: 0.4, y: 0.7, active: true, source: 'leap'});
+// 手离开追踪范围时释放，保留惯性。
+air.releaseInput();
+air.setParameters({response: 0.45, feather: 0.65, drift: 0.5});
+air.snapshot();
+air.diagnostics();
+await air.reset();
+```
+
+本地验证：`npm test` 包含 AIR 的位移、阻尼、释放、羽毛响应、帧率一致性、输入校验和重置测试。开发服务下访问 `/tests/air-species-browser.html` 可检查真实 Canvas 四路响应、纹理尺寸、释放和绘制耗时。该诊断页不包含在生产入口中，不能把它的 Canvas 绘制耗时当作整套 3D 装置的帧率。
+
+本轮已完成桌面浏览器的十二屏点击归属、XY 拖动、滑行恢复、参数重置、空白刷新/还原，以及窄屏可滚动布局检查。四个 AIR 屏幕的控制面板均提供“进入四路生命画面”按钮。Safari、真实触摸设备、真实摄像头和 Leap Motion 尚未验证；视觉形态仍需作者审阅。
+
+### AIR Living Canvas / AIR Remote（独立轻量页面）
+
+- `air.html`：同时显示全景、纤维微距、气流和轨迹四路实时画面。同一个生命状态驱动四张 Canvas 持续运动，不是静态图；不创建完整 CRT 场景，也不加载其余 11 屏和硬件渲染。
+- `air-remote.html`：专用双触控板遥控页，服务于四路页面及现有四屏 AIR。remote 本身不运行 3D 或第二套生命模拟，只发送输入并显示实时状态回传。
+- 四路页面中直接拖动任一画面控制飞行，Shift + 拖动控制形态；触摸设备第一根手指控制飞行，第二根手指控制形态。
+- 渲染使用四张 2D Canvas，不创建 WebGL renderer。桌面最多 30 FPS，触摸设备最多 24 FPS；纹理分辨率保持固定，后台暂停模拟。
+- 总控制器 `controller.html` 的 SPECIAL MODE 提供 AIR VIEWS / AIR REMOTE 入口。进入四路页面时发送 `suspendScene`，暂停完整装置的 Three.js 与其他内容渲染；返回总控时恢复。
+- 专属 remote 与总控统一使用浅灰机壳、黑色按键、橙色播放态、带孔触控板和金属旋钮。五个 AIR 参数旋钮及总控旋钮均支持拖动、键盘和点击数字直接输入。
+- DISPLAY SELECT 的 `01–04` 可独立播放/暂停四路，另有 ALL ON / ALL OFF。关闭的画面停止绘制并保留最后一帧和 PAUSED 标记，生命模拟继续，重新打开时与当前状态同步。
+- 飞行与形态相位使用连续时间，不再在 `2π` 处强制取模，避免非整数频率动画产生头尾跳变。跨周期连续性已加入回归测试。
+- `air-remote-protocol.js` 统一飞行、形态、参数、重置和状态请求消息。状态回传最多 10Hz，并省略轨迹数组以降低流量。开发、预览及 Cloudflare Durable Object 使用同一中继协议。
+- 已实测桌面拖动、remote 飞行与吸附、手机竖屏布局和模拟触摸拖动；真实双指硬件与 Safari 仍需最终设备复核。
+
+本地地址：
+
+```text
+http://192.168.1.4:5173/air.html
+http://192.168.1.4:5173/air-remote.html
+```
 
 主要配置位于 `src/config.js`：
 
@@ -196,7 +266,7 @@ OSC 本身需通过 OSC → WebSocket/JSON 桥接程序转换；项目不声称�
 
 ## 尚未完成 / 后续开发
 
-- 海洋、飞行和植物物种交互内容按需求暂不开发；当前保留占位纹理和实时 Canvas 示例。
+- AIR 飞行四屏已在本地接入实时交互；海洋和植物屏幕继续保留原占位内容。
 - 摄像头调用与权限流程已实现；实际镜头画面仍需在授权设备上确认。当前自动化浏览器未提供可确认的摄像头实拍。
 - 已在内置 Chrome 浏览器实测；Safari 的最终 GPU、透明排序和摄像头兼容性仍建议在目标设备上复核。
 - 公网跨设备控制需要带 HTTPS 的正式中继与访问控制；纯静态托管不包含服务端能力。

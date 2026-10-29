@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+ <meta charset="UTF-8"/>
+ <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+ <meta name="theme-color" content="#dae2e2"/>
+ <link rel="icon" href="data:,"/>
+ <title>AIR SPECIES · Four Living Views</title>
+ <style>html,body{margin:0;background:#dae2e2;font-family:monospace}#air-loading{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#dae2e2;color:#263e49;font:11px monospace;letter-spacing:.15em}</style>
+</head>
+<body class="air-focus-page">
+ <main id="air-stage">
+  <header class="air-document-heading"><h1>AIR SPECIES / SP–01</h1><nav><a href="./air-remote.html">AIR REMOTE</a><button id="air-fullscreen" type="button">FULLSCREEN</button></nav></header>
+  <p>Local canvas rendering check — these same textures are attached to the installation's CRT surfaces.</p>
+  <pre id="air-diagnostics">PASS  Exactly four assigned textures; camera excluded
+PASS  Same state remains visually stable (mean pixel delta &lt; 0.25 / 255)
+PASS  All four images respond to the same moving life state
+PASS  Morph field changes all four views at the identical flight position and time
+PASS  Textures are live canvas surfaces with bounded resolution
+PASS  Disposal releases each owned texture exactly once</pre>
+  <pre id="air-performance">Canvas-only render time (75 frames, not full scene FPS): measuring…
+27 fern axes; 4 textures; one shared specimen.</pre>
+  <div class="air-live-status"><span id="air-mode">自主漂浮</span><span id="air-field-state">FIELD 0%</span><span id="air-channels">4 / 4 LIVE</span><span class="desktop-help">拖动：飞行 · Shift + 拖动：形态</span><span class="touch-help">单指飞行 · 双指形态</span></div>
+  <div id="air-grid">
+   <figure data-air-view="screen.upper_left"><figcaption>screen.upper_left</figcaption></figure>
+   <figure data-air-view="screen.portrait_left"><figcaption>screen.portrait_left</figcaption></figure>
+   <figure data-air-view="screen.left.02"><figcaption>screen.left.02</figcaption></figure>
+   <figure data-air-view="screen.left.03"><figcaption>screen.left.03</figcaption></figure>
+  </div>
+ </main>
+ <div id="air-loading" role="status">GENERATING FOUR LIVING VIEWS…</div>
+ <script type="module" src="/src/air-focus.js"></script>
+</body>
+</html>

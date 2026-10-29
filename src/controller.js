@@ -21,7 +21,7 @@ function render(){
 function valueFor(type){const data=current();return type==='brightness'?data.display.brightness:data.rotation[type==='rotationX'?0:1]*180/Math.PI;}
 function updateKnob(type,value=valueFor(type)){
  const knob=$(`[data-knob="${type}"]`),normalized=type==='brightness'?value/2:(value+180)/360,angle=Math.max(-135,Math.min(135,normalized*270-135));
- knob.querySelector('.knob-indicator').style.transform=`rotate(${angle}deg)`;knob.setAttribute('aria-valuenow',value.toFixed(type==='brightness'?2:1));$(`#${type}-value`).textContent=type==='brightness'?value.toFixed(2):`${value.toFixed(1)}°`;
+ knob.querySelector('.knob-indicator').style.transform=`rotate(${angle}deg)`;knob.setAttribute('aria-valuenow',value.toFixed(type==='brightness'?2:1));const input=$(`#${type}-value`);if(document.activeElement!==input)input.value=type==='brightness'?value.toFixed(2):value.toFixed(1);
 }
 function setValue(type,value){
  value=type==='brightness'?Math.max(0,Math.min(2,value)):Math.max(-180,Math.min(180,value));updateKnob(type,value);
@@ -35,6 +35,7 @@ for(const type of ['rotationX','rotationY','brightness']){
  knob.addEventListener('pointermove',event=>{if(!drag)return;const scale=type==='brightness'?.008:.8;setValue(type,drag.value+(drag.y-event.clientY)*scale);});
  const end=()=>drag=null;knob.addEventListener('pointerup',end);knob.addEventListener('pointercancel',end);
  knob.addEventListener('keydown',event=>{if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();const direction=['ArrowUp','ArrowRight'].includes(event.key)?1:-1;setValue(type,valueFor(type)+direction*(type==='brightness'?.05:1));});
+ const numberInput=$(`#${type}-value`);numberInput.addEventListener('input',()=>{const value=Number(numberInput.value);if(Number.isFinite(value))setValue(type,value);});
 }
 function surface(element,onMove,onEnd){
  let last=null;element.addEventListener('pointerdown',event=>{event.preventDefault();element.setPointerCapture(event.pointerId);last={x:event.clientX,y:event.clientY};});
@@ -52,5 +53,7 @@ $('#flip').addEventListener('click',()=>{send({type:'flip'});status('已切换�
 $('#toggle-ui').addEventListener('click',()=>{uiVisible=!uiVisible;send({type:'ui',visible:uiVisible});$('#toggle-ui').textContent=uiVisible?'SHOW UI':'PURE VIEW';});
 $('#upload').addEventListener('click',()=>$('#file').click());
 $('#file').addEventListener('change',async event=>{const file=event.target.files[0];if(!file)return;try{$('#upload').disabled=true;status(`正在传输 ${file.name}…`);const response=await fetch('./api/media',{method:'POST',headers:{'Content-Type':file.type||'application/octet-stream','X-File-Name':encodeURIComponent(file.name)},body:file});if(!response.ok)throw new Error('媒体上传失败');const media=await response.json();send({type:'upload',id:selected,url:media.url,name:media.name});status('媒体已传输到主场景');}catch(error){status(error.message);}finally{$('#upload').disabled=false;event.target.value='';}});
+for(const id of ['air-views-link','air-remote-link'])document.querySelector('#'+id).addEventListener('click',event=>{event.preventDefault();const href=event.currentTarget.href;send({type:'suspendScene',suspend:true});setTimeout(()=>location.href=href,80);});
+send({type:'suspendScene',suspend:false});
 setInterval(()=>{send({type:'state'});if(lastState&&Date.now()-lastState>6500){$('#connection-dot').classList.remove('online');$('#connection-label').textContent='等待主场景';}},5000);
 send({type:'state'});render();

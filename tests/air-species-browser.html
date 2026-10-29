@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AIR SPECIES · Local render check</title>
+<style>body{margin:28px;background:#dae2e2;color:#263e49;font:13px/1.6 monospace}h1{font:20px Arial;letter-spacing:.13em}#views{display:grid;grid-template-columns:2fr 1fr 1.2fr 1.2fr;gap:20px;align-items:start}figure{margin:0}img{width:100%;height:auto}figcaption{font-size:11px}pre{white-space:pre-wrap}</style>
+<h1>AIR SPECIES / SP–01</h1><p>Local canvas rendering check — these same textures are attached to the installation's CRT surfaces.</p><pre id="result">Rendering…</pre><div id="views"></div>
+<script type="module">
+import {createAirSpeciesViews} from '../src/air-species-views.js';
+import {createAirSpeciesState,AIR_SCREEN_IDS} from '../src/air-species-state.js';
+const views=createAirSpeciesViews(),flight=createAirSpeciesState(),checks=[];
+function check(name,condition){checks.push({name,passed:!!condition});if(!condition)throw Error(name);}
+function hash(canvas){const pixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;let hash=2166136261;for(let i=0;i<pixels.length;i+=16)hash=Math.imul(hash^pixels[i],16777619);return hash>>>0;}
+try{
+ check('Exactly four assigned textures; camera excluded',JSON.stringify([...views.textures.keys()])===JSON.stringify(AIR_SCREEN_IDS)&&!views.textures.has('screen.desk'));
+ views.render(flight.state);
+ const initial=[...views.textures.values()].map(texture=>hash(texture.image));
+ const firstPixels=[...views.textures.values()].map(t=>t.image.getContext('2d').getImageData(0,0,t.image.width,t.image.height).data);
+ views.render(flight.state);
+ const pixelDifferences=[...views.textures.values()].map((t,i)=>{const current=t.image.getContext('2d').getImageData(0,0,t.image.width,t.image.height).data;let total=0;for(let j=0;j<current.length;j++)total+=Math.abs(current[j]-firstPixels[i][j]);return total/current.length;});
+ check('Same state remains visually stable (mean pixel delta < 0.25 / 255): '+pixelDifferences.map(n=>n.toFixed(4)).join(', '),pixelDifferences.every(delta=>delta<.25));
+ flight.setInput({x:.8,y:.7,source:'render-check'});
+ flight.setFieldInput({x:.25,y:.2,source:'render-check'});
+ const times=[];
+ for(let i=0;i<90;i++){flight.step(1/30);const start=performance.now();views.render(flight.state);if(i>=15)times.push(performance.now()-start);}
+ check('All four images respond to the same moving life state',initial.every((value,i)=>value!==hash([...views.textures.values()][i].image)));
+ const influenced=flight.snapshot(),withoutField={...influenced,field:{...influenced.field,strength:0,energy:0,swirl:0}};
+ views.render(withoutField);const passive=[...views.textures.values()].map(t=>hash(t.image));views.render(influenced);
+ check('Morph field changes all four views at the identical flight position and time',passive.every((value,i)=>value!==hash([...views.textures.values()][i].image)));
+ check('Textures are live canvas surfaces with bounded resolution',[...views.textures.values()].every(t=>t.isCanvasTexture&&!t.generateMipmaps&&t.image.width<=1024&&t.image.height<=1024));
+ flight.releaseInput();for(let i=0;i<18;i++)flight.step(1/30);views.render(flight.state);
+ for(const [id,texture] of views.textures){const figure=document.createElement('figure'),image=document.createElement('img'),caption=document.createElement('figcaption');image.src=texture.image.toDataURL('image/png');image.alt=id;caption.textContent=id;figure.append(image,caption);document.querySelector('#views').append(figure);}
+ const diagnostics=views.diagnostics();let disposed=0;for(const texture of views.textures.values())texture.addEventListener('dispose',()=>disposed++);views.dispose();views.dispose();
+ check('Disposal releases each owned texture exactly once',disposed===4&&[...views.textures.values()].every(t=>t.image.width===0));
+ times.sort((a,b)=>a-b);
+ document.querySelector('#result').textContent=checks.map(item=>'PASS  '+item.name).join('\n')+'\n\nCanvas-only render time (75 frames, not full scene FPS): median '+times[Math.floor(times.length*.5)].toFixed(2)+' ms; p95 '+times[Math.floor(times.length*.95)].toFixed(2)+' ms.\n'+diagnostics.fronds+' fern axes; 4 textures; one shared specimen.';
+ document.body.dataset.passed='true';
+}catch(error){document.querySelector('#result').textContent='FAIL '+error.message;document.body.dataset.passed='false';throw error;}
+</script></html>

@@ -20,7 +20,7 @@ export const screens = [
     ],
     "bezel": 0.17,
     "acrylic": 0.18,
-    "label": "左上 · 云层"
+    "label": "左上 · AIR 飞行全景"
   },
   {
     "id": "screen.upper_center",
@@ -108,7 +108,7 @@ export const screens = [
     ],
     "bezel": 0.13,
     "acrylic": 0.13,
-    "label": "左侧竖屏 · 地球"
+    "label": "左侧竖屏 · AIR 羽枝微距"
   },
   {
     "id": "screen.left.01",
@@ -152,7 +152,7 @@ export const screens = [
     ],
     "bezel": 0.13,
     "acrylic": 0.08,
-    "label": "左翼 02 · 波形"
+    "label": "左翼 02 · AIR 气流信号"
   },
   {
     "id": "screen.left.03",
@@ -174,7 +174,7 @@ export const screens = [
     ],
     "bezel": 0.13,
     "acrylic": 0.08,
-    "label": "左翼 03 · 数据"
+    "label": "左翼 03 · AIR 飞行轨迹"
   },
   {
     "id": "screen.right.01",
