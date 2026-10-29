@@ -1,0 +1,26 @@
+{
+  "name": "future-species",
+  "main": "cloudflare/worker.js",
+  "compatibility_date": "2026-10-29",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "FUTURE_SPECIES_ROOM",
+        "class_name": "FutureSpeciesRoom"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["FutureSpeciesRoom"]
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

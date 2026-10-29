@@ -7,13 +7,16 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "deploy": "npm run build && wrangler deploy",
+    "deploy:dry": "npm run build && wrangler deploy --dry-run"
   },
   "dependencies": {
     "three": "0.180.0"
   },
   "devDependencies": {
     "vite": "^8.3.5",
+    "wrangler": "^4.155.0",
     "ws": "^8.22.0"
   }
 }
