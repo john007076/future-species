@@ -1,4 +1,4 @@
-// Working dimensions inferred from the approved photograph. Screen poses fitted to its four display corners.
+// Dimensions inferred from the approved photograph; conservative default poses keep every display readable from the front.
 export const screens = [
   {
     "id": "screen.upper_left",
@@ -180,8 +180,8 @@ export const screens = [
     "id": "screen.right.01",
     "texture": "right_01",
     "position": [
-      3.30645,
-      4.15223,
+      3.65645,
+      5.18,
       1.05
     ],
     "rotation": [
@@ -246,25 +246,34 @@ export const screens = [
     "id": "screen.desk",
     "texture": "desk",
     "position": [
-      1.71182,
-      2.42864,
-      -0.92
+      2.68,
+      4.08,
+      -0.72
     ],
     "rotation": [
-      -0.12798,
-      -0.12184,
-      -0.00305
+      0,
+      -0.12,
+      0
     ],
     "size": [
-      0.33582,
-      0.42117,
-      0.39
+      0.83955,
+      1.052925,
+      0.58
     ],
     "bezel": 0.055,
     "acrylic": 0.025,
-    "label": "桌面 · 小屏"
+    "label": "中央右侧 · 摄像头画面"
   }
 ];
+export const seatFocus=[0,2.9,1];
+for(const screen of screens){
+ const inward=screen.position[0]<0?1:-1;
+ if(screen.id==='screen.center_main')screen.rotation=[0,0,0];
+ else if(screen.id==='screen.upper_center')screen.rotation=[.12,0,0];
+ else if(screen.id==='screen.upper_left'||screen.id==='screen.upper_right')screen.rotation=[.12,inward*.32,inward*-.06];
+ else if(screen.id==='screen.desk')screen.rotation=[0,inward*.12,0];
+ else screen.rotation=[0,inward*.22,0];
+}
 export const cabinetSpecs = [
   {id:'cabinet.left.upper',position:[-4.84,5.96,1.63],size:[1.17,2.02,.83],rotation:.5,seed:11},
   {id:'cabinet.left.middle',position:[-4.97,3.72,1.81],size:[1.28,1.55,.95],rotation:.48,seed:22},
@@ -273,10 +282,45 @@ export const cabinetSpecs = [
   {id:'cabinet.right.middle',position:[4.9,4.52,1.78],size:[1.3,2.13,.97],rotation:-.48,seed:55},
   {id:'cabinet.right.lower',position:[4.83,1.75,1.88],size:[1.28,1.88,.96],rotation:-.46,seed:66},
 ];
+export const screenDesign = {
+  'screen.upper_left': {model:'translucent-crt', resolution:[640,480]},
+  'screen.upper_center': {model:'studio-crt', resolution:[800,600]},
+  'screen.upper_right': {model:'studio-crt', resolution:[800,600]},
+  'screen.center_main': {model:'studio-crt', resolution:[1024,768]},
+  'screen.portrait_left': {model:'portrait-crt', resolution:[600,1200]},
+  'screen.left.01': {model:'compact-crt', resolution:[640,480]},
+  'screen.left.02': {model:'compact-crt', resolution:[640,480]},
+  'screen.left.03': {model:'translucent-crt', resolution:[800,600]},
+  'screen.right.01': {model:'compact-crt', resolution:[640,480]},
+  'screen.right.02': {model:'translucent-crt', resolution:[800,600]},
+  'screen.right.03': {model:'compact-crt', resolution:[800,600]},
+  'screen.desk': {model:'micro-crt', resolution:[320,400]},
+};
+
+export const displayDefaults = {
+  mode:'image', brightness:1, saturation:.88, contrast:1.04, tint:'#dce8e5', scanlines:.09, flip:false,
+};
+
+export const sceneSettings = {
+  background:'#466f87',
+  fog:{near:33,far:95},
+  exposure:.96,
+  environmentIntensity:.57,
+  hemisphere:{sky:'#b2d3e2',ground:'#857c69',intensity:1.4},
+  key:{color:'#f3ead7',intensity:2.05,position:[-7,11,8]},
+  fill:{color:'#c4e3ef',intensity:1.1,position:[8,8,5]},
+  rim:{color:'#d5e7e8',intensity:1.25,position:[3,6,-6]},
+  floor:{color:'#517f93',roughness:.53,metalness:.12},
+  grain:.018,
+  pixelRatioLimit:1.6,
+};
+
 export const views = {
   reference:{position:[0,5.86,28],target:[0,4.15,0],fov:21.3},
   front:{position:[0,4.5,28],target:[0,4.5,0],fov:24},
-  side:{position:[16,7.6,13],target:[0,4.4,0],fov:34},
-  top:{position:[11,17,16],target:[0,3,0],fov:38},
+  left:{position:[-16,7.6,13],target:[0,4.4,0],fov:34},
+  right:{position:[16,7.6,13],target:[0,4.4,0],fov:34},
   back:{position:[0,7.1,-24],target:[0,4.4,0],fov:28},
+  top:{position:[0,22,4],target:[0,2.5,0],fov:38},
+  seat:{position:[-.06,2.65,1.1],target:[0,4.35,-1.5],fov:64},
 };

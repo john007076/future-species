@@ -107,22 +107,20 @@ export function createStructure(materials) {
 
   const cables = [], thinCables = [];
   for (const side of [-1, 1]) {
-    for (let i = 0; i < 10; i++) {
-      const x = side * (4.02 + rand() * 0.48);
-      const top = 3.10 + rand() * 5.65;
-      const drop = 0.65 + rand() * 1.15;
-      const z = 1.30 + rand() * .45;
-      const points = [
-        [x, top, z],
-        [x - side * .12, top - .22, z + .09],
-        [x - side * (.13 + rand() * .16), top - drop, z + .1],
-        [x + side * .13, top - drop - .04, z],
-        [side * 4.42, top - drop + .2, 1.48],
-      ];
-      (i % 3 === 0 ? thinCables : cables).push({ points, radius: i % 3 === 0 ? .007 : .012, segments: 26 });
+    for (let i = 0; i < 6; i++) {
+      const x = side * 4.42, z = 1.48, offset = (i - 2.5) * .013;
+      const points = [[x, 7.95, z], [x + offset, 7.72, z + .055]];
+      for (let step = 0; step <= 20; step++) {
+        const t = step / 20, y = 7.72 - t * 7.48, angle = i * 1.3 + t * 2.2;
+        points.push([x + offset + Math.cos(angle) * .047, y, z + Math.sin(angle) * .047]);
+      }
+      for (let step = 0; step <= 10; step++) {
+        const t = step / 10, angle = i + t * Math.PI * 2;
+        points.push([x + offset + Math.cos(angle) * .095, .24 - t * .31, z + Math.sin(angle) * .095]);
+      }
+      points.push([x + offset, -.07, z + .04]);
+      (i % 3 === 0 ? thinCables : cables).push({ points, radius: i % 3 === 0 ? .005 : .008, segments: 90 });
     }
-    cables.push({ points: [[side*4.42,1.3,1.48],[side*4.66,.42,1.67],[side*4.82,.27,1.57],[side*4.91,.72,1.36],[side*4.68,1.12,1.4]],radius:.016,segments:40 });
-    thinCables.push({ points: [[side*4.58,9.0,1.47],[side*4.69,8.7,1.55],[side*4.62,5.6,1.56],[side*4.69,2.3,1.54],[side*4.51,.7,1.55]],radius:.007,segments:64 });
   }
   tubes(group, 'structure.blackHarnesses', cables, cable);
   tubes(group, 'structure.tanSignalLeads', thinCables, tanCable);
@@ -140,8 +138,8 @@ export function createStool(materials) {
   group.name = 'stool';
   group.userData = { id: 'stool', interactionId: 'stool', kind: 'seat' };
   const ivory = new THREE.MeshPhysicalMaterial({
-    color: materials.cream?.color?.clone() || new THREE.Color(0xe1d7bc),
-    roughness: .31, metalness: .015, clearcoat: .26, clearcoatRoughness: .32,
+    color: 0xe6e0cd,
+    roughness: .29, metalness: .01, clearcoat: .3, clearcoatRoughness: .3,
   });
   const lathe = (name, points, material) => {
     const profile = new THREE.SplineCurve(points.map(p => new THREE.Vector2(...p))).getPoints(96);

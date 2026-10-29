@@ -68,13 +68,17 @@ export function createMounts(materials, registry) {
   const tableZ = table ? table.getWorldPosition(new THREE.Vector3()).z - .48 : -.93;
   for (const [id, owner] of registry) {
     const kind = owner.userData.kind;
-    if (!['screen', 'cabinet', 'instrument'].includes(kind)) continue;
+    if (!['screen', 'cabinet', 'instrument', 'camera'].includes(kind)) continue;
     owner.updateWorldMatrix(true, true);
     const local = localPorts(owner, kind);
     if (![local.mount, ...local.ports].every(p => p.toArray().every(Number.isFinite))) throw new Error(`Invalid hardware dimensions: ${id}`);
     const initialMount = owner.localToWorld(local.mount.clone());
     let fixed;
-    if (kind === 'instrument' || id === 'screen.desk') {
+    if (id === 'screen.desk') {
+      fixed = new THREE.Vector3(3.15, initialMount.y, -1.35);
+    } else if (kind === 'camera') {
+      fixed = new THREE.Vector3(0, 8.15, arcZ(0));
+    } else if (kind === 'instrument') {
       fixed = new THREE.Vector3(initialMount.x, tableY - .09, tableZ);
     } else if (kind === 'cabinet' || /screen\.(left|right)\.|upper_(left|right)/.test(id)) {
       fixed = new THREE.Vector3(initialMount.x < 0 ? -4.42 : 4.42, initialMount.y, 1.48);
@@ -82,11 +86,24 @@ export function createMounts(materials, registry) {
       const x = Math.abs(initialMount.x + 1.79) < Math.abs(initialMount.x - 1.68) ? -1.79 : 1.68;
       fixed = new THREE.Vector3(x, initialMount.y, arcZ(x));
     }
+    let route = { x: fixed.x, z: fixed.z };
+    if (kind === 'camera') route = { x: 1.68, z: arcZ(1.68) };
+    if (kind === 'instrument') {
+      const legs = [[-1.92, 1.57], [1.92, 1.57], [-1.45, -.6], [1.45, -.6]].map(([x, z]) => table ? table.localToWorld(new THREE.Vector3(x, 0, z)) : new THREE.Vector3(x, 0, z));
+      const leg = legs.reduce((nearest, candidate) => Math.abs(candidate.x - fixed.x) < Math.abs(nearest.x - fixed.x) ? candidate : nearest);
+      route = { x: leg.x, z: leg.z };
+    }
     const group = new THREE.Group();
     group.name = `mounts.${id}`;
     group.userData = { ownerId: id, id, kind: 'linkedMount' };
     root.add(group);
-    const struts = instanced(group, `${id}.mount.struts`, UNIT_CYLINDER, materials.metal, 3);
+    const struts = instanced(group, `${id}.mount.struts`, UNIT_CYLINDER, materials.metal, id === 'screen.desk' ? 4 : 3);
+    if (id === 'screen.desk') {
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(.12, .14, .045, 24), materials.metal);
+      base.name = 'screen.desk.floorStand.base';base.position.set(fixed.x, .025, fixed.z);base.castShadow = true;group.add(base);
+      const pad = new THREE.Mesh(new THREE.CylinderGeometry(.125, .125, .018, 24), materials.rubber || materials.dark);
+      pad.name = 'screen.desk.floorStand.pad';pad.position.set(fixed.x, .004, fixed.z);group.add(pad);
+    }
     const hinges = instanced(group, `${id}.mount.hinges`, UNIT_CYLINDER, materials.metal, 4);
     const plates = instanced(group, `${id}.mount.plates`, UNIT_BOX, materials.metal, 2);
     const washers = instanced(group, `${id}.mount.washers`, UNIT_CYLINDER, materials.dark, 4);
@@ -104,7 +121,7 @@ export function createMounts(materials, registry) {
     frameAnchor.name = `${id}.mount.frameAnchor`;
     frameAnchor.position.copy(fixed);
     group.add(hardwareAnchor, frameAnchor);
-    records.set(id, { id, owner, kind, local, fixed, group, struts, hinges, plates, washers, connectors, wires, hardwareAnchor, frameAnchor, snapshot: null });
+    records.set(id, { id, owner, kind, local, fixed, route, group, struts, hinges, plates, washers, connectors, wires, hardwareAnchor, frameAnchor, snapshot: null });
   }
 
   function update(id) {
@@ -118,7 +135,7 @@ export function createMounts(materials, registry) {
     const rearElbow = end.clone().addScaledVector(backDirection, kind === 'instrument' ? .055 : .12);
     const outsideElbow = new THREE.Vector3(fixed.x, rearElbow.y, rearElbow.z);
     const joints = [end, rearElbow, outsideElbow, fixed.clone()];
-    const radius = kind === 'instrument' || id === 'screen.desk' ? .013 : .023;
+    const radius = kind === 'instrument' ? .013 : .023;
     const horizontalPin = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2);
     for (let i = 0; i < 3; i++) {
       const delta = joints[i + 1].clone().sub(joints[i]);
@@ -127,13 +144,14 @@ export function createMounts(materials, registry) {
       const rotation = new THREE.Quaternion().setFromUnitVectors(Y_AXIS, direction);
       writeInstance(struts, i, joints[i].clone().add(joints[i + 1]).multiplyScalar(.5), [radius, Math.max(length, .001), radius], rotation);
     }
+    if (id === 'screen.desk') writeInstance(struts, 3, new THREE.Vector3(fixed.x, (fixed.y + .05) / 2, fixed.z), [radius, fixed.y - .05, radius]);
     for (let i = 0; i < joints.length; i++) {
       writeInstance(hinges, i, joints[i], [radius * 1.5, .065, radius * 1.5], horizontalPin);
       writeInstance(washers, i, joints[i].clone().add(new THREE.Vector3(.035, 0, 0)), [radius * 1.85, .008, radius * 1.85], horizontalPin);
     }
     writeInstance(plates, 0, end, kind === 'instrument' ? [.13, .08, .025] : [.18, .26, .035], orientation);
     writeInstance(plates, 1, fixed, [.105, .14, .10]);
-    const endpoints = [], pathPoints = [];
+    const endpoints = [], pathPoints = [], route = record.route;
     for (let i = 0; i < 2; i++) {
       const port = owner.localToWorld(local.ports[i].clone());
       const framePort = fixed.clone().add(new THREE.Vector3(i ? .046 : -.046, -.10, -.035));
@@ -144,14 +162,30 @@ export function createMounts(materials, registry) {
         port.clone().lerp(framePort, .53).add(new THREE.Vector3(0, -slack, -.06 - i * .025)),
         framePort.clone().add(new THREE.Vector3(0, -.10, -.055)),
         framePort,
+        new THREE.Vector3(route.x, Math.max(.85, fixed.y - .06), route.z),
       ];
-      const geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 28, i ? .0055 : .0085, 6, false);
+      const phase = id.length * .73 + i * Math.PI, coilTop = Math.max(.85, fixed.y - .06);
+      for (let step = 0; step <= 18; step++) {
+        const t = step / 18, angle = phase + t * Math.PI * 4;
+        points.push(new THREE.Vector3(route.x + Math.cos(angle) * .052, coilTop - t * .38, route.z + Math.sin(angle) * .052));
+      }
+      for (let step = 1; step <= 7; step++) {
+        const t = step / 7, angle = phase + Math.PI * 4 + t * .8;
+        points.push(new THREE.Vector3(route.x + Math.cos(angle) * .052, THREE.MathUtils.lerp(coilTop - .38, .25, t), route.z + Math.sin(angle) * .052));
+      }
+      for (let step = 0; step <= 14; step++) {
+        const t = step / 14, angle = phase + t * Math.PI * 3;
+        points.push(new THREE.Vector3(route.x + Math.cos(angle) * (.09 + i * .018), .25 - t * .32, route.z + Math.sin(angle) * (.09 + i * .018)));
+      }
+      const floorEnd = new THREE.Vector3(route.x + (i ? .025 : -.025), -.07, route.z + .035);
+      points.push(floorEnd);
+      const geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), Math.max(64, points.length * 3), i ? .0055 : .0085, 6, false);
       const previous = wires[i].geometry;
       wires[i].geometry = geometry;
       previous.dispose();
       writeInstance(connectors, i, port, [.055, .055, .043], orientation);
       writeInstance(connectors, i + 2, framePort, [.055, .07, .055]);
-      endpoints.push({ hardware: port.toArray(), frame: framePort.toArray() });
+      endpoints.push({ hardware: port.toArray(), frame: framePort.toArray(), floor: floorEnd.toArray() });
       pathPoints.push(points.map(point => point.toArray()));
     }
     [struts, hinges, plates, washers, connectors].forEach(finishInstances);

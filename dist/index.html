@@ -1,9 +1,61 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#59869a"/><link rel="icon" href="data:,"/><title>Future Plan · 交互装置</title>  <script type="module" crossorigin src="./assets/index-DHip-KIq.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-US3FnfCN.css">
+<html lang="zh-CN">
+<head>
+ <meta charset="UTF-8"/>
+ <meta name="viewport" content="width=device-width,initial-scale=1"/>
+ <meta name="theme-color" content="#d4d4cc"/>
+ <link rel="icon" href="data:,"/>
+ <title>FUTURE SPECIES · Future Plan</title>
+ <style>html,body{background:#d4d4cc;width:100%;height:100%;margin:0;overflow:hidden}body.is-booting{font-family:Arial,PingFang SC,sans-serif}body.is-booting #controls,body.is-booting #identity,body.is-booting #utility-controls,body.is-booting #hint,body.is-booting #selection{opacity:0;pointer-events:none}#loading.boot-screen{z-index:100;box-sizing:border-box;color:#29302d;background:radial-gradient(circle at 50% 15%,#e7e7df,#b8bcb5);place-items:center;padding:20px;transition:opacity .55s;display:grid;position:fixed;inset:0}.boot-console{background:linear-gradient(145deg,#dfded6,#c7c9c1);border:1px solid #f6f5ed;border-radius:10px;width:min(760px,94vw);padding:24px;box-shadow:0 20px 65px #42484238,inset 0 1px #fff9,inset 0 -2px 5px #8f938b44}.boot-head{border-bottom:1px solid #a3a79f;justify-content:space-between;align-items:center;gap:15px;padding-bottom:18px;display:flex}.boot-brand small{letter-spacing:.15em;color:#697069;font:8px monospace;display:block}.boot-brand strong{letter-spacing:.18em;margin-top:8px;font-size:20px;font-weight:500;display:block}.boot-status{color:#cbd8cc;letter-spacing:.08em;background:#222b2b;border-radius:3px;align-items:center;gap:8px;padding:10px 12px;font:9px monospace;display:flex}.boot-status i{background:#d68652;border-radius:50%;width:6px;height:6px;animation:1.5s ease-in-out infinite bootPulse;box-shadow:0 0 8px #d6865266}.boot-workspace{grid-template-columns:1.25fr 1fr;gap:16px;margin-top:18px;display:grid}.boot-display{color:#d7dfd3;background:#202a2a;border:1px solid #161e1d;border-radius:4px;padding:22px;box-shadow:inset 0 3px 10px #0008,0 1px #f4f3e9}.boot-eyebrow{letter-spacing:.14em;opacity:.48;font:8px monospace}.boot-display strong{letter-spacing:.08em;margin-top:20px;font-size:17px;font-weight:400;display:block}.boot-display small{color:#a9b8ad;min-height:30px;margin-top:10px;font:10px/1.6 monospace;display:block}.boot-track{background:#4d5b55;height:3px;margin-top:23px;overflow:hidden}.boot-track i{background:#d9dac3;width:0;height:100%;transition:width .25s;display:block}.boot-meta{color:#94a59a;justify-content:space-between;margin-top:10px;font:8px monospace;display:flex}.boot-hardware{background:#ced0c8;border:1px solid #f2f1e8;border-radius:5px;justify-content:space-around;align-items:center;gap:16px;padding:18px;display:flex;box-shadow:inset 0 0 0 1px #a7aaa155}.boot-keys{grid-template-columns:repeat(3,18px);gap:6px;display:grid}.boot-keys i{background:linear-gradient(#38403e,#202725);border-radius:2px;width:18px;height:18px;box-shadow:0 2px #121715}.boot-keys i:nth-child(4){background:linear-gradient(#e18b5a,#c7683d);box-shadow:0 2px #954629}.boot-joystick{background:radial-gradient(circle,#28302e 0 29%,#a4aaa2 30% 42%,#e1e1d7 43% 57%,#b0b5ab 58%);border-radius:50%;width:72px;height:72px;position:relative;box-shadow:0 4px 7px #555c5244}.boot-joystick i{background:radial-gradient(circle at 35% 25%,#eda77a,#cc6a3e 70%);border-radius:50%;width:29px;height:29px;position:absolute;top:22px;left:22px;box-shadow:0 4px 6px #0005}.boot-knobs{gap:9px;display:flex}.boot-knobs i{background:radial-gradient(circle at 36% 30%,#f0f0e7,#a6ada2 75%);border:3px solid #bcc0b7;border-radius:50%;width:27px;height:27px;box-shadow:0 3px 5px #555c5244}.boot-footer{color:#697069;letter-spacing:.1em;border-top:1px solid #a3a79f;justify-content:space-between;margin-top:18px;padding-top:13px;font:8px monospace;display:flex}#loading.boot-screen .boot-status{opacity:1;letter-spacing:.08em;font-size:9px}#loading.boot-screen .boot-display small{opacity:.82;letter-spacing:.03em;font-size:10px}#loading.boot-screen .boot-meta span{opacity:1;letter-spacing:.08em}@keyframes bootPulse{50%{opacity:.35}}@media (width<=620px){#loading.boot-screen{padding:12px}.boot-console{padding:16px}.boot-brand strong{font-size:15px}.boot-workspace{grid-template-columns:1fr}.boot-hardware{min-height:95px;padding:14px}.boot-display strong{margin-top:14px}.boot-status{padding:8px;font-size:7px}.boot-footer{font-size:7px}}</style>
+  <script type="module" crossorigin src="./assets/main-BZJOJ_XE.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/remote-channel-u4cOrBp5.js">
+  <link rel="stylesheet" crossorigin href="./assets/main-DsE4WYl8.css">
 </head>
-<body><canvas id="scene" aria-label="Future Plan 三维交互装置，可拖动旋转、滚轮缩放"></canvas>
-<div id="loading" role="status">正在装配场景<span>FUTURE PLAN</span></div>
-<nav id="controls" aria-label="场景视角"><button data-view="reference" aria-pressed="true">参考视角</button><button data-view="front" aria-pressed="false">正面</button><button data-view="side" aria-pressed="false">侧面</button><button data-view="back" aria-pressed="false">背面</button><button data-view="top" aria-pressed="false">俯视</button><span class="divider"></span><button id="hide-ui" title="按 H 恢复界面">隐藏界面</button></nav>
-<div id="selection" hidden><span id="selection-name"></span><button id="content-demo">内容示例</button><button id="content-restore">还原</button><button id="clear-selection" aria-label="关闭选择">×</button></div>
-<p id="hint">拖动旋转 · 滚轮缩放 · 点击选择位置 <span>H 隐藏界面</span></p></body></html>
+<body class="is-booting">
+ <canvas id="scene" aria-label="FUTURE SPECIES 三维交互装置，可拖动旋转、滚轮缩放、点击选择屏幕"></canvas>
+ <div id="loading" class="boot-screen" role="status">
+  <div class="boot-console">
+   <div class="boot-head"><div class="boot-brand"><small>FUTURE PLAN / REMOTE UNIT 01</small><strong>FUTURE SPECIES</strong></div><span class="boot-status"><i></i> SYSTEM BOOT</span></div>
+   <div class="boot-workspace">
+    <div class="boot-display"><span class="boot-eyebrow">ASSEMBLING INSTALLATION</span><strong id="loading-title">正在装配场景</strong><small id="loading-detail">准备 WebGL 与材质…</small><div class="boot-track" id="loading-meter" role="progressbar" aria-label="场景加载进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="loading-progress"></i></div><div class="boot-meta"><span>12 DISPLAYS / LINKED HARDWARE</span><span id="loading-percent">00%</span></div></div>
+    <div class="boot-hardware"><div class="boot-keys"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="boot-joystick"><i></i></div><div class="boot-knobs"><i></i><i></i><i></i></div></div>
+   </div>
+   <div class="boot-footer"><span>FS–RC01 / CONTROL SURFACE</span><span>PLEASE WAIT</span></div>
+  </div>
+ </div>
+ <header id="identity"><strong>FUTURE SPECIES</strong><span>FUTURE PLAN / 12 CHANNEL INSTALLATION</span></header>
+ <nav id="controls" aria-label="场景视角">
+  <button data-view="reference" aria-pressed="true">参考构图</button><button data-view="front" aria-pressed="false">正视</button><button data-view="left" aria-pressed="false">左视</button><button data-view="right" aria-pressed="false">右视</button><button data-view="back" aria-pressed="false">背视</button><button data-view="top" aria-pressed="false">俯视</button><button data-view="seat" aria-pressed="false">座椅视角</button><span class="divider"></span><button id="hide-ui" title="按 H 恢复界面">隐藏界面</button>
+ </nav>
+ <div id="utility-controls"><button id="camera-toggle">打开摄像头</button><button id="flip-camera">反转画面</button><a href="./controller.html" target="_blank" rel="noopener">移动触控台</a></div>
+ <div id="toast" role="status" hidden></div>
+ <aside id="selection" aria-label="硬件编辑" hidden>
+  <div class="panel-heading"><div><small>SELECTED HARDWARE</small><strong id="selection-name"></strong></div><button id="clear-selection" aria-label="关闭选择">×</button></div>
+  <fieldset class="hardware-only"><legend>角度 <span>滑块 / 度数</span></legend>
+   <label class="angle-control">X <input type="range" min="-180" max="180" step="1" data-rotation-slider="0" aria-label="X 角度滑块"/><input type="number" min="-360" max="360" step="1" data-rotation="0" aria-label="X 角度输入"/></label>
+   <label class="angle-control">Y <input type="range" min="-180" max="180" step="1" data-rotation-slider="1" aria-label="Y 角度滑块"/><input type="number" min="-360" max="360" step="1" data-rotation="1" aria-label="Y 角度输入"/></label>
+   <label class="angle-control">Z <input type="range" min="-180" max="180" step="1" data-rotation-slider="2" aria-label="Z 角度滑块"/><input type="number" min="-360" max="360" step="1" data-rotation="2" aria-label="Z 角度输入"/></label>
+   <button id="reset-hardware" class="reset-button">归位默认位置</button>
+  </fieldset>
+  <details class="screen-only position-advanced"><summary>高级：XYZ 位置</summary><div class="vector-grid">
+   <label>X <input type="number" step="0.01" min="-30" max="30" data-position="0" aria-label="位置 X"/></label><label>Y <input type="number" step="0.01" min="-30" max="30" data-position="1" aria-label="位置 Y"/></label><label>Z <input type="number" step="0.01" min="-30" max="30" data-position="2" aria-label="位置 Z"/></label>
+  </div></details>
+  <div class="screen-only">
+   <fieldset><legend>独立显示</legend>
+    <label class="wide">内容状态 <select id="screen-select"><option value="image">图片 / 占位内容</option><option value="video">视频</option><option value="live">Canvas / 实时纹理</option><option value="blank">空白</option></select></label>
+    <label>亮度 <input type="range" min="0" max="2" step="0.01" data-display="brightness"/></label>
+    <label>饱和度 <input type="range" min="0" max="2" step="0.01" data-display="saturation"/></label>
+    <label>对比度 <input type="range" min="0.2" max="2" step="0.01" data-display="contrast"/></label>
+    <label>扫描线 <input type="range" min="0" max="0.5" step="0.01" data-display="scanlines"/></label>
+    <label class="wide">色调 <input type="color" data-display="tint"/></label>
+   </fieldset>
+   <div class="button-grid"><button id="content-upload">上传图片 / 视频</button><button id="content-blank">空白</button><button id="content-demo">实时纹理</button><button id="content-restore">还原内容</button></div>
+   <details><summary>布局与项目配置</summary><div class="button-grid"><button id="save-project">保存到项目</button><button id="export-layout">导出 JSON</button><button id="import-layout">导入 JSON</button></div></details>
+   <input id="content-file" type="file" accept="image/*,video/*" hidden/><input id="layout-file" type="file" accept="application/json,.json" hidden/>
+  </div>
+  <p id="editor-status" role="status"></p>
+ </aside>
+ <p id="hint">拖动旋转 · 滚轮缩放 · 单击屏幕编辑 <span>H 隐藏 / 显示界面 · Esc 取消选择</span></p>
+ <script>window.addEventListener('error',event=>{const detail=document.querySelector('#loading-detail');if(detail)detail.textContent='启动错误：'+(event.message||'模块加载失败');});window.addEventListener('unhandledrejection',event=>{const detail=document.querySelector('#loading-detail');if(detail)detail.textContent='启动错误：'+event.reason;});</script>
+</body>
+</html>

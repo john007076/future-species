@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/><meta name="theme-color" content="#d7d5cc"/><link rel="icon" href="data:,"/><title>FUTURE SPECIES · 触控台</title>  <script type="module" crossorigin src="./assets/controller-rDjPC1eZ.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/remote-channel-u4cOrBp5.js">
+  <link rel="stylesheet" crossorigin href="./assets/controller-C7LN9USJ.css">
+</head>
+<body>
+ <main class="console-shell">
+  <header class="console-header"><div><p>FUTURE PLAN / REMOTE UNIT 01</p><h1>FUTURE SPECIES</h1></div><div class="connection"><span id="connection-dot"></span><div><small>MAIN DISPLAY LINK</small><strong id="connection-label">等待主场景</strong></div></div></header>
+  <div class="console-grid">
+   <section class="panel channel-panel"><div class="section-title"><span>01</span><h2>DISPLAY SELECT</h2><small>12 CHANNEL</small></div><div id="screen-grid" class="screen-grid"></div><div class="readout"><div><small>SELECTED DISPLAY</small><strong id="screen-name">中央 · 花朵</strong></div><span id="screen-id">04</span></div><div class="content-buttons"><button id="blank" class="key">BLANK</button><button id="restore" class="key">SOURCE</button><button id="upload" class="key light">UPLOAD</button><button id="flip" class="key light">FLIP</button><button id="camera" class="key orange">CAMERA</button></div><input id="file" type="file" accept="image/*,video/*" hidden/></section>
+   <section class="panel motion-panel"><div class="section-title"><span>02</span><h2>MOTION / CAMERA</h2><small>TOUCH SURFACE</small></div><div class="motion-controls"><div class="joystick-wrap"><div id="joystick" class="joystick"><div class="joystick-ring"></div><div id="joystick-stick" class="joystick-stick"><span></span></div></div><label>ORBIT</label></div><div class="touchpad-wrap"><div id="touchpad" class="touchpad"><div id="touchpad-grid"></div><span>DRAG TO ORBIT</span></div><label>TRACKPAD</label></div><div class="zoom-control"><input id="zoom" type="range" min="60" max="140" value="100" aria-label="相机缩放"/><label>ZOOM</label></div></div><div class="view-keys"><button data-view="reference" class="key light">HOME</button><button data-view="front" class="key">FRONT</button><button data-view="back" class="key">REAR</button><button data-view="seat" class="key">SEAT</button><button data-view="top" class="key light">TOP</button></div></section>
+   <section class="panel knobs-panel"><div class="section-title"><span>03</span><h2>HARDWARE / SIGNAL</h2><small>ROTARY CONTROL</small></div><div class="knob-bank"><div class="knob-unit"><div class="knob" data-knob="rotationX" role="slider" tabindex="0" aria-label="屏幕 X 角度"><div class="knob-cap"><i class="knob-indicator"></i></div></div><output id="rotationX-value">0°</output><label>PITCH / X</label></div><div class="knob-unit"><div class="knob" data-knob="rotationY" role="slider" tabindex="0" aria-label="屏幕 Y 角度"><div class="knob-cap"><i class="knob-indicator"></i></div></div><output id="rotationY-value">0°</output><label>YAW / Y</label></div><div class="knob-unit"><div class="knob" data-knob="brightness" role="slider" tabindex="0" aria-label="屏幕亮度"><div class="knob-cap"><i class="knob-indicator"></i></div></div><output id="brightness-value">1.00</output><label>LEVEL</label></div></div><div class="signal-row"><button id="toggle-ui" class="key light">PURE VIEW</button><span>DRAG KNOBS VERTICALLY</span></div></section>
+  </div>
+  <footer><span>FS–RC01 / LOW VOLTAGE DIGITAL CONTROL</span><span id="status" role="status">系统就绪</span><a href="./" target="_blank" rel="noopener">OPEN MAIN DISPLAY ↗</a></footer>
+ </main>
+</body>
+</html>
