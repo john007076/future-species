@@ -27,3 +27,5 @@ test('kelp holdfasts stay fixed and fish headings follow their travel direction'
  for(const index of [1,2,3,4,5,6,7])for(const t of [0,10,51,200]){const p=roamingPose(index,t),length=Math.hypot(p.vx,p.vz);assert.ok(((-Math.cos(p.yaw)*p.vx+Math.sin(p.yaw)*p.vz)/length)>.999);assert.ok(Math.abs(p.pitch)<.5);}
  for(const t of [0,10,50])assert.ok(Math.abs(roamingPose(0,t).yaw)<.1);
 });
+
+test('archive screen only selects specimens and ignores model orbit, zoom and contact',()=>{const m=createMarineState();m.selectScreen('screen.right.03');const before=m.snapshot();m.orbit(.4,.2);m.zoom(1.6);m.contact({active:true,x:.4,y:.3});assert.deepEqual(m.state.view,before.view);assert.equal(m.state.touch.active,false);m.inspect('shark');assert.equal(m.state.species,'shark');});

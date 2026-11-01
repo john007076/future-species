@@ -499,8 +499,7 @@ export function createMarineViews({renderer}) {
   for(let i=0;i<18;i++){const source=Object.values(specimens)[i%9],root=source.clone(true);root.traverse(part=>{if(part.isLight)part.visible=false;if(part.isInstancedMesh)keep(part);});const originals=[],copies=[];source.traverse(p=>originals.push(p));root.traverse(p=>copies.push(p));root.userData.limbPairs=copies.slice(1).map((p,j)=>[p,originals[j+1]]);scene.add(root);residents.push(root);}
 
   function drawArchive(state, force) {
-    const archiveView=state.viewStates?.['screen.right.03']||{yaw:0,pitch:0,zoom:1};
-    const key = state.species + ':' + state.phase+JSON.stringify(archiveView);
+    const key = state.species + ':' + state.phase;
     if (!force && key === lastArchive) return; lastArchive = key;
     const {ctx,canvas}=archive;
     ctx.setTransform(3,0,0,3,0,0);const field=ctx.createRadialGradient(110,100,0,170,150,330);field.addColorStop(0,'#123747');field.addColorStop(.48,'#071e2c');field.addColorStop(1,'#020a13');ctx.fillStyle=field;ctx.fillRect(0,0,400,380);
@@ -509,8 +508,7 @@ export function createMarineViews({renderer}) {
     Object.entries(SPECIES).forEach(([id,entry],i)=>{
       const x=16+i%3*123,y=78+Math.floor(i/3)*78,active=id===state.species;
       ctx.save();ctx.beginPath();ctx.rect(x+3,y+2,109,50);ctx.clip();
-      if(active){ctx.translate(x+57.5,y+27);ctx.rotate(archiveView.yaw);ctx.scale(archiveView.zoom,archiveView.zoom*Math.max(.35,Math.cos(archiveView.pitch)));ctx.drawImage(atlasImages.get(id),-54.5,-25,109,50);}
-      else ctx.drawImage(atlasImages.get(id),x+3,y+2,109,50);ctx.restore();
+      ctx.drawImage(atlasImages.get(id),x+3,y+2,109,50);ctx.restore();
       if(active){ctx.strokeStyle='#d4c9a5';ctx.lineWidth=.8;ctx.strokeRect(x+.5,y+.5,114,69);}
       ctx.fillStyle=active?'#e0dfc6':'#afc7c3';ctx.font='9px "FS Pixel"';ctx.textAlign='center';ctx.fillText(entry.name,x+57,y+65);ctx.textAlign='left';
     });

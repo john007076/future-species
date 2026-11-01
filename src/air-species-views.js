@@ -1,3 +1,4 @@
+import {orientAirPoint} from './air-view-projection.js';
 import * as THREE from 'three';
 import {morphLobes,applyMorphField} from './air-species-field.js';
 
@@ -93,7 +94,7 @@ export function createAirSpeciesViews(options = {}) {
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.generateMipmaps = false;
     texture.minFilter = texture.magFilter = THREE.LinearFilter;
-    return [id, {id,orbitBuffer:canvasOf(width,height),canvas, ctx: canvas.getContext('2d'), texture, sky: sky(width, height, id === 'screen.left.03')}];
+    return [id, {id,canvas, ctx: canvas.getContext('2d'), texture, sky: sky(width, height, id === 'screen.left.03')}];
   }));
   const textures = new Map([...entries].map(([id, entry]) => [id, entry.texture]));
   const specimen = canvasOf(1024, 1024), specimenContext = specimen.getContext('2d');
@@ -120,7 +121,7 @@ export function createAirSpeciesViews(options = {}) {
     specimenContext.drawImage(membrane,0,0,1024,1024);
   }
 
-  function drawSpecimen(state) {
+  function drawSpecimen(state,view) {
     const ctx = specimenContext, paths = INK.map(() => new Path2D()), shafts = new Path2D();
     ctx.clearRect(0, 0, 1024, 1024);
     const field=state.field,lobes=morphLobes(state),flow=state.params.fluidity;
@@ -150,6 +151,7 @@ export function createAirSpeciesViews(options = {}) {
         p[1] += Math.sin(state.phase * .7 - u * 3.5 - lag + frond.phase * .13) * .05 * feather;
         p[2] += Math.sin(state.phase * .43 + u * 3 + frond.phase) * .24;
         applyMorphField(p,u,state,lobes);
+        orientAirPoint(p,view);
         const x = p[0] * cy + p[2] * sy, y = p[1] * (.98 + (stretch - 1) * .12);
         line[j * 3] = 512 + (x * cos - y * sin) * 249;
         line[j * 3 + 1] = 501 + (x * sin + y * cos) * 249;
@@ -189,10 +191,6 @@ export function createAirSpeciesViews(options = {}) {
 
   function finish(entry, state, heading, footer, dark = false) {
     const {ctx, canvas} = entry, {width: w, height: h} = canvas;
-    const view=state.viewTransforms?.[entry.id];
-    if(view&&(view.yaw||view.pitch||view.zoom!==1)){
-      entry.orbitBuffer.getContext('2d').drawImage(canvas,0,0);ctx.drawImage(entry.sky,0,0);ctx.save();ctx.translate(w/2,h/2);ctx.rotate(view.yaw);ctx.scale(view.zoom,view.zoom*Math.max(.35,Math.cos(view.pitch)));ctx.drawImage(entry.orbitBuffer,-w/2,-h/2);ctx.restore();
-    }
     ctx.save();
     ctx.globalAlpha = .37;
     ctx.fillStyle = ctx.createPattern(filmGrain, 'repeat');
@@ -251,6 +249,7 @@ export function createAirSpeciesViews(options = {}) {
         const envelope = Math.sin(x / w * Math.PI);
         const y = y0 + Math.sin(x * .012 + state.phase * .55 + row * .19) * (8 + state.speed * 7) * envelope + state.wind.y * x * .12;
         point[0]=(x/w-.5)*3.5;point[1]=(y/h-.4)*3;point[2]=0;applyMorphField(point,1,state,lobes);
+        orientAirPoint(point,state.viewTransforms?.['screen.left.02']);
         const fx=(point[0]/3.5+.5)*w,fy=(point[1]/3+.4)*h;
         x === -8 ? path.moveTo(fx,fy) : path.lineTo(fx,fy);
       }
@@ -297,20 +296,21 @@ export function createAirSpeciesViews(options = {}) {
     textures,
     render(state, enabled = () => true) {
       if (disposed || !channels.some(([id]) => entries.has(id) && enabled(id))) return;
-      if (['screen.upper_left', 'screen.portrait_left', 'screen.left.03'].some(id => entries.has(id) && enabled(id))) drawSpecimen(state);
-      if (entries.has('screen.upper_left') && enabled('screen.upper_left')) drawMain(state);
-      if (entries.has('screen.portrait_left') && enabled('screen.portrait_left')) drawDetail(state);
-      if (entries.has('screen.left.02') && enabled('screen.left.02')) drawSignal(state);
-      if (entries.has('screen.left.03') && enabled('screen.left.03')) drawTrail(state);
+      let lastProjection=null;
+      for(const [id,draw] of [['screen.upper_left',drawMain],['screen.portrait_left',drawDetail],['screen.left.02',drawSignal],['screen.left.03',drawTrail]]){
+        if(!entries.has(id)||!enabled(id))continue;
+        if(id!=='screen.left.02'){const view=state.viewTransforms?.[id],key=JSON.stringify(view||{yaw:0,pitch:0,zoom:1});if(key!==lastProjection){drawSpecimen(state,view);lastProjection=key;}}
+        draw(state);
+      }
       frames++;
     },
     diagnostics() {
-      return {frames, fronds: fronds.length, textures: channels.map(([id, width, height]) => ({id, width, height})), sharedSpecimen: true,morphField:'three-lobe scalar field'};
+      return {frames, fronds: fronds.length, textures: channels.map(([id, width, height]) => ({id, width, height})), sharedSpecimen: true,independentViewProjection:true,morphField:'three-lobe scalar field'};
     },
     dispose() {
       if (disposed) return;
       disposed = true;
-      for (const entry of entries.values()) { entry.texture.dispose(); entry.canvas.width = entry.canvas.height = 0; entry.sky.width = entry.sky.height = entry.orbitBuffer.width = entry.orbitBuffer.height = 0; }
+      for (const entry of entries.values()) { entry.texture.dispose(); entry.canvas.width = entry.canvas.height = 0; entry.sky.width = entry.sky.height = 0; }
       specimen.width = specimen.height = filmGrain.width = filmGrain.height = 0;
       membrane.width=membrane.height=0;
     },

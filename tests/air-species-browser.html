@@ -21,6 +21,9 @@ try{
  flight.orbitView('screen.portrait_left',.4,.2);views.render(flight.state);
  const afterOrbit=[...views.textures.values()].map(texture=>hash(texture.image));
  check('AIR view rotation changes only the selected fibre screen',beforeOrbit[1]!==afterOrbit[1]&&[0,2,3].every(i=>beforeOrbit[i]===afterOrbit[i]));flight.resetView('screen.portrait_left');
+ const mainCanvas=views.textures.get('screen.upper_left').image,strip=mainCanvas.getContext('2d').getImageData(100,0,200,10).data;
+ flight.orbitView('screen.upper_left',.65,.35);views.render(flight.state);const rotatedStrip=mainCanvas.getContext('2d').getImageData(100,0,200,10).data;let skyDelta=0;for(let i=0;i<strip.length;i++)skyDelta+=Math.abs(strip[i]-rotatedStrip[i]);skyDelta/=strip.length;
+ check('Rotating AIR geometry leaves the fixed sky and screen border intact',skyDelta<.25);flight.resetView('screen.upper_left');
  flight.setInput({x:.8,y:.7,source:'render-check'});
  flight.setFieldInput({x:.25,y:.2,source:'render-check'});
  const times=[];

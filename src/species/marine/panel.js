@@ -76,7 +76,7 @@ export function createMarinePanel({marine,audio}) {
   if(lastPhase!==s.phase+audio.status+s.inspecting){phase.textContent=s.inspecting?'Inspecting':s.phase==='LISTENING'&&!active?'Ready / simulate call':PHASES[s.phase];lastPhase=s.phase+audio.status+s.inspecting;}
   if(document.activeElement!==find('[data-zoom]'))find('[data-zoom]').value=s.view.zoom;
   species.textContent=SPECIES[s.species]?.name||s.species;element.dataset.phase=s.phase;
-  const locked=s.selectedScreen==='screen.right.01';find('[data-marine-pad]').classList.toggle('rotation-locked',locked);find('.instrument-pad-help').innerHTML=locked?'FIXED ORIENTATION · SOUND RESPONSE<br>SCROLL OR PINCH TO ZOOM':'DRAG TO ORBIT · SHIFT + DRAG TO TOUCH<br>SCROLL OR PINCH TO ZOOM';
+  const indexOnly=s.selectedScreen==='screen.right.03',locked=s.selectedScreen==='screen.right.01'||indexOnly;find('[data-zoom]').disabled=indexOnly;find('[data-reset-view]').disabled=indexOnly;find('[data-marine-pad]').classList.toggle('rotation-locked',locked);find('.instrument-pad-help').innerHTML=indexOnly?'SPECIMEN INDEX · SELECT ONLY':locked?'FIXED ORIENTATION · SOUND RESPONSE<br>SCROLL OR PINCH TO ZOOM':'DRAG TO ORBIT · SHIFT + DRAG TO TOUCH<br>SCROLL OR PINCH TO ZOOM';
   if(lastStatus!==audio.message){permission.textContent=audio.message;lastStatus=audio.message;}
   mic.textContent=pending?'CANCEL REQUEST':active?'STOP MIC':'ENABLE MIC';
   mic.disabled=busy&&!active&&!pending;find('[data-input-done]').disabled=!active&&!pending;
