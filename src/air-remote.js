@@ -1,7 +1,8 @@
 import {AIR_SCREEN_IDS,AIR_DEFAULTS,createAirSpeciesState} from './air-species-state.js';
 import {createRemoteChannel} from './remote-channel.js';
+import './hardware-console.css';
 
-const flight=createAirSpeciesState(),channels=new Map(AIR_SCREEN_IDS.map(id=>[id,true])),modeLabels={floating:'自主漂浮',responding:'跟随气流',gliding:'惯性滑行'},fieldLabels={resting:'等待触碰',attracting:'吸附与流动',relaxing:'余流回弹'};
+const flight=createAirSpeciesState(),channels=new Map(AIR_SCREEN_IDS.map(id=>[id,true])),modeLabels={floating:'Floating',responding:'Following airflow',gliding:'Gliding'},fieldLabels={resting:'Waiting for touch',attracting:'Attraction and flow',relaxing:'Relaxing'};
 const $=selector=>document.querySelector(selector),clamp=(value,min=0,max=1)=>Math.max(min,Math.min(max,value)),signed=value=>(value>=0?'+':'−')+Math.abs(value).toFixed(2);
 let lastTelemetry=0;
 function send(message){remote.sendControl(message);}
@@ -9,7 +10,7 @@ const remote=createRemoteChannel({onState(message){
  if(message?.type!=='airTelemetry'||!message.state)return;
  Object.assign(flight.state,message.state);lastTelemetry=Date.now();
  if(message.channels)for(const id of AIR_SCREEN_IDS)if(typeof message.channels[id]==='boolean')channels.set(id,message.channels[id]);
- $('#air-connection-dot').classList.add('online');$('#air-connection-label').textContent='生命画面在线';render();
+ $('#air-connection-dot').classList.add('online');$('#air-connection-label').textContent='Living views online';render();
 }});
 
 function updateChannels(){
@@ -20,7 +21,7 @@ function setChannel(id,enabled){channels.set(id,enabled);updateChannels();send({
 document.querySelectorAll('[data-air-view]').forEach(button=>button.addEventListener('click',()=>setChannel(button.dataset.airView,!channels.get(button.dataset.airView))));
 $('#air-all').addEventListener('click',()=>{for(const id of AIR_SCREEN_IDS)setChannel(id,true);});
 $('#air-none').addEventListener('click',()=>{for(const id of AIR_SCREEN_IDS)setChannel(id,false);});
-$('#air-reset').addEventListener('click',()=>{send({type:'airReset'});$('#air-remote-status').textContent='已请求重置生命状态';});
+$('#air-reset').addEventListener('click',()=>{send({type:'airReset'});$('#air-remote-status').textContent='Living state reset requested';});
 
 function bindPad(name){
  const pad=$(`[data-air-pad="${name}"]`),target=pad.querySelector('.air-pad-target'),position=pad.querySelector('.air-pad-position');
@@ -60,6 +61,6 @@ function render(){
  const field=flight.state.field,influence=$('.air-field-influence');influence.style.left=`${50+clamp(field.x,-1,1)*45}%`;influence.style.top=`${50-clamp(field.y,-1,1)*45}%`;influence.style.opacity=String(.2+field.strength*.55);influence.style.transform=`translate(-50%,-50%) rotate(${field.phase*12+field.swirl*35}deg)`;
  for(const key of Object.keys(AIR_DEFAULTS))if(!activeKnobs.has(key))updateKnob(key);
 }
-setInterval(()=>{send({type:'airStateRequest'});if(lastTelemetry&&Date.now()-lastTelemetry>6500){$('#air-connection-dot').classList.remove('online');$('#air-connection-label').textContent='等待生命画面';}},5000);
+setInterval(()=>{send({type:'airStateRequest'});if(lastTelemetry&&Date.now()-lastTelemetry>6500){$('#air-connection-dot').classList.remove('online');$('#air-connection-label').textContent='Waiting for living views';}},5000);
 send({type:'airStateRequest'});render();addEventListener('beforeunload',()=>{flightPad.release();fieldPad.release();remote.close();});
 window.airRemote={snapshot:flight.snapshot,requestState:()=>send({type:'airStateRequest'}),setViewState:setChannel,diagnostics:()=>({remoteOnly:true,webgl:false,connected:!!lastTelemetry,channels:Object.fromEntries(channels)})};

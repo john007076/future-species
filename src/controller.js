@@ -1,6 +1,7 @@
 import {screens,displayDefaults} from './config.js';
 import {createRemoteChannel} from './remote-channel.js';
 import './controller.css';
+import './hardware-console.css';
 
 const $=selector=>document.querySelector(selector),localScreens=Object.fromEntries(screens.map(spec=>[spec.id,{rotation:[...spec.rotation],display:{...displayDefaults}}]));
 let selected='screen.center_main',uiVisible=true,lastState=0;
@@ -8,7 +9,7 @@ const status=message=>{$('#status').textContent=message;};
 const remote=createRemoteChannel({onState(payload){
  if(!payload?.layout)return;Object.assign(localScreens,payload.layout.screens);lastState=Date.now();
  if(payload.layout.screens[payload.selected])selected=payload.selected;
- uiVisible=payload.uiVisible??uiVisible;$('#connection-dot').classList.add('online');$('#connection-label').textContent='主场景在线';$('#camera').textContent=payload.cameraActive?'CAM OFF':'CAMERA';$('#toggle-ui').textContent=uiVisible?'PURE VIEW':'SHOW UI';render();
+ uiVisible=payload.uiVisible??uiVisible;$('#connection-dot').classList.add('online');$('#connection-label').textContent='Main display online';$('#camera').textContent=payload.cameraActive?'CAM OFF':'CAMERA';$('#toggle-ui').textContent=uiVisible?'PURE VIEW':'SHOW UI';render();
 }});
 const send=message=>remote.sendControl(message),pending=new Map();let frame=0;
 function queue(key,message){pending.set(key,message);if(!frame)frame=requestAnimationFrame(()=>{for(const value of pending.values())send(value);pending.clear();frame=0;});}
@@ -28,7 +29,7 @@ function setValue(type,value){
  if(type==='brightness'){current().display.brightness=value;queue('display',{type:'display',id:selected,patch:{brightness:value}});}
  else{const axis=type==='rotationX'?0:1;current().rotation[axis]=value*Math.PI/180;queue('transform',{type:'transform',id:selected,patch:{rotation:[...current().rotation]}});}
 }
-for(const spec of screens){const button=document.createElement('button');button.className='screen-key';button.dataset.screen=spec.id;button.innerHTML=`${String(screens.indexOf(spec)+1).padStart(2,'0')}<small>${spec.id.replace('screen.','').slice(0,7).toUpperCase()}</small>`;button.setAttribute('aria-label',spec.label);button.addEventListener('click',()=>{selected=spec.id;send({type:'select',id:selected});render();status(`已选择 ${spec.label}`);});$('#screen-grid').append(button);}
+for(const spec of screens){const button=document.createElement('button');button.className='screen-key';button.dataset.screen=spec.id;button.innerHTML=`${String(screens.indexOf(spec)+1).padStart(2,'0')}<small>${spec.id.replace('screen.','').slice(0,7).toUpperCase()}</small>`;button.setAttribute('aria-label',spec.label);button.addEventListener('click',()=>{selected=spec.id;send({type:'select',id:selected});render();status(`Selected ${spec.label}`);});$('#screen-grid').append(button);}
 for(const type of ['rotationX','rotationY','brightness']){
  const knob=$(`[data-knob="${type}"]`);let drag=null;
  knob.addEventListener('pointerdown',event=>{event.preventDefault();knob.setPointerCapture(event.pointerId);drag={y:event.clientY,value:valueFor(type)};});
@@ -45,16 +46,19 @@ function surface(element,onMove,onEnd){
 surface($('#joystick'),(dx,dy,event)=>{const rect=$('#joystick').getBoundingClientRect(),x=event.clientX-(rect.left+rect.width/2),y=event.clientY-(rect.top+rect.height/2),length=Math.hypot(x,y),limit=31,scale=length>limit?limit/length:1;$('#joystick-stick').style.transform=`translate(${x*scale}px,${y*scale}px)`;queue('camera',{type:'cameraMove',dx:dx*1.4,dy:dy*1.4});},()=>{$('#joystick-stick').style.transform='';});
 surface($('#touchpad'),(dx,dy)=>queue('camera',{type:'cameraMove',dx:dx*1.7,dy:dy*1.7}));
 let zoom=100;$('#zoom').addEventListener('input',event=>{const next=Number(event.target.value);queue('zoom',{type:'cameraMove',zoom:zoom/next});zoom=next;});
-document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{send({type:'view',name:button.dataset.view});status(`切换${button.textContent}视角`);}));
-$('#blank').addEventListener('click',()=>{send({type:'mode',id:selected,mode:'blank'});current().display.mode='blank';status('当前屏幕已设为空白');});
-$('#restore').addEventListener('click',()=>{send({type:'restore',id:selected});current().display.mode='image';status('已恢复占位内容');});
-$('#camera').addEventListener('click',()=>{send({type:'camera'});status('正在请求主场景摄像头权限…');});
-$('#flip').addEventListener('click',()=>{send({type:'flip'});status('已切换摄像头画面水平反转');});
+document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{send({type:'view',name:button.dataset.view});status(`Switch${button.textContent}view`);}));
+$('#blank').addEventListener('click',()=>{send({type:'mode',id:selected,mode:'blank'});current().display.mode='blank';status('Selected screen blanked');});
+$('#restore').addEventListener('click',()=>{send({type:'restore',id:selected});current().display.mode='image';status('Source content restored');});
+$('#camera').addEventListener('click',()=>{send({type:'camera'});status('Requesting camera access on the main display...');});
+$('#flip').addEventListener('click',()=>{send({type:'flip'});status('Camera horizontal flip toggled');});
 $('#toggle-ui').addEventListener('click',()=>{uiVisible=!uiVisible;send({type:'ui',visible:uiVisible});$('#toggle-ui').textContent=uiVisible?'SHOW UI':'PURE VIEW';});
 $('#upload').addEventListener('click',()=>$('#file').click());
-$('#file').addEventListener('change',async event=>{const file=event.target.files[0];if(!file)return;try{$('#upload').disabled=true;status(`正在传输 ${file.name}…`);const response=await fetch('./api/media',{method:'POST',headers:{'Content-Type':file.type||'application/octet-stream','X-File-Name':encodeURIComponent(file.name)},body:file});if(!response.ok)throw new Error('媒体上传失败');const media=await response.json();send({type:'upload',id:selected,url:media.url,name:media.name});status('媒体已传输到主场景');}catch(error){status(error.message);}finally{$('#upload').disabled=false;event.target.value='';}});
-document.querySelector('#air-views-link').addEventListener('click',event=>{event.preventDefault();send({type:'openAirViews'});status('已让主 Web 打开四路生命画面，总控保持当前页面。');});
+$('#file').addEventListener('change',async event=>{const file=event.target.files[0];if(!file)return;try{$('#upload').disabled=true;status(`Sending ${file.name}…`);const response=await fetch('./api/media',{method:'POST',headers:{'Content-Type':file.type||'application/octet-stream','X-File-Name':encodeURIComponent(file.name)},body:file});if(!response.ok)throw new Error('Media upload failed');const media=await response.json();send({type:'upload',id:selected,url:media.url,name:media.name});status('Media sent to main display');}catch(error){status(error.message);}finally{$('#upload').disabled=false;event.target.value='';}});
+document.querySelector('#air-views-link').addEventListener('click',event=>{event.preventDefault();send({type:'openAirViews'});status('Living views opened on the main display. This console stays here.');});
 document.querySelector('#air-remote-link').addEventListener('click',event=>{event.preventDefault();send({type:'suspendScene',suspend:true});setTimeout(()=>location.href='./air-remote.html',80);});
+document.querySelector('#main-home-link').addEventListener('click',()=>send({type:'suspendScene',suspend:false}));
 send({type:'suspendScene',suspend:false});
-setInterval(()=>{send({type:'state'});if(lastState&&Date.now()-lastState>6500){$('#connection-dot').classList.remove('online');$('#connection-label').textContent='等待主场景';}},5000);
+setInterval(()=>{send({type:'state'});if(lastState&&Date.now()-lastState>6500){$('#connection-dot').classList.remove('online');$('#connection-label').textContent='Waiting for main display';}},5000);
 send({type:'state'});render();
+
+document.querySelector('#marine-views-link').addEventListener('click',event=>{event.preventDefault();send({type:'openMarineViews'});status('Marine views opened on the main display. This console stays here.');});

@@ -3,12 +3,12 @@ import {box,mesh,rod,screws,instances} from './model-utils.js';
 
 function displayTexture(){
  const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128;const context=canvas.getContext('2d');
- context.fillStyle='#202a2a';context.fillRect(0,0,512,128);context.fillStyle='#9fb6aa';context.font='17px monospace';context.fillText('SELECTED DISPLAY',24,31);context.fillStyle='#e0e4d4';context.font='26px monospace';context.fillText('04  CENTER MAIN',24,78);context.fillStyle='#d97747';context.fillRect(24,101,78,5);
+ context.fillStyle='#202a2a';context.fillRect(0,0,512,128);context.fillStyle='#9fb6aa';context.font='17px "FS Pixel"';context.fillText('SELECTED DISPLAY',24,31);context.fillStyle='#e0e4d4';context.font='26px "FS Pixel"';context.fillText('04  CENTER MAIN',24,78);context.fillStyle='#d97747';context.fillRect(24,101,78,5);
  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;return texture;
 }
 
 export function createConsoleController(mats){
- const root=new THREE.Group();root.name='instrument.console';root.userData={id:'instrument.console',kind:'instrument',label:'桌面 · 配套触控台'};
+ const root=new THREE.Group();root.name='instrument.console';root.userData={id:'instrument.console',kind:'instrument',label:'DESK / REMOTE CONSOLE'};
  const orange=new THREE.MeshStandardMaterial({color:0xd97845,roughness:.42,metalness:.04});
  box(root,'console.lowerCase',[3.3,.13,1.16],[0,.075,0],mats.cream,.055);
  box(root,'console.topPlate',[3.22,.035,1.08],[0,.155,0],mats.metal,.035);

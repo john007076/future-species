@@ -23,16 +23,24 @@ import {AIR_SCREEN_IDS,createAirSpeciesState} from './air-species-state.js';
 import {createAirSpeciesViews} from './air-species-views.js';
 import {createAirSpeciesPanel} from './air-species-panel.js';
 import {airTelemetry,applyAirRemoteControl} from './air-remote-protocol.js';
+import {MARINE_SCREEN_IDS,createMarineState} from './species/marine/state.js';
+import {createMarineViews} from './species/marine/views.js';
+import {createMarineAudio} from './species/marine/audio.js';
+import {createMarinePanel} from './species/marine/panel.js';
+import {applyMarineRemoteControl,marineTelemetry,archiveSpeciesAt} from './species/marine/remote.js';
 import './style.css';
+import './hardware-console.css';
+
+await document.fonts.load('12px "FS Pixel"');
 
 const canvas=document.querySelector('#scene'),loading=document.querySelector('#loading'),loadingDetail=document.querySelector('#loading-detail');
 function setBootProgress(value,detail){const percent=Math.round(value);document.querySelector('#loading-progress').style.width=percent+'%';document.querySelector('#loading-percent').textContent=String(percent).padStart(2,'0')+'%';document.querySelector('#loading-meter').setAttribute('aria-valuenow',String(percent));if(detail)loadingDetail.textContent=detail;}
-function fatal(message){if(!loading.isConnected)document.body.append(loading);document.body.classList.add('is-booting');loading.style.opacity=1;document.querySelector('#loading-title').textContent='场景无法启动';loadingDetail.textContent=message;}
+function fatal(message){if(!loading.isConnected)document.body.append(loading);document.body.classList.add('is-booting');loading.style.opacity=1;document.querySelector('#loading-title').textContent='Scene failed to start';loadingDetail.textContent=message;}
 let renderer;
 try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance',preserveDrawingBuffer:true});}
-catch(error){fatal('请使用支持 WebGL 2 的桌面版 Chrome 或 Safari，并开启硬件加速。'+error.message);throw error;}
+catch(error){fatal('Use desktop Chrome or Safari with WebGL 2 and hardware acceleration.'+error.message);throw error;}
 renderer.setPixelRatio(Math.min(devicePixelRatio,sceneSettings.pixelRatioLimit));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.VSMShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=sceneSettings.exposure;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.info.autoReset=false;
-canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();renderer.setAnimationLoop(null);fatal('WebGL 上下文已丢失，正在等待浏览器恢复…');});
+canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();renderer.setAnimationLoop(null);fatal('WebGL Graphics context lost. Waiting for recovery...');});
 canvas.addEventListener('webglcontextrestored',()=>location.reload());
 const scene=new THREE.Scene();scene.background=new THREE.Color(sceneSettings.background);scene.fog=new THREE.Fog(sceneSettings.background,sceneSettings.fog.near,sceneSettings.fog.far);
 const camera=new THREE.PerspectiveCamera(views.reference.fov,innerWidth/innerHeight,.08,180);
@@ -51,13 +59,13 @@ const registry=new Map(),displayMeshes=new Map(),originalMaps=new Map(),selectio
 let mounts=null;
 function register(root,label){const id=root.userData.id||root.name;if(registry.has(id))throw Error('Duplicate interactive id: '+id);root.userData.id=id;if(label)root.userData.label=label;registry.set(id,root);return root;}
 installation.add(createStructure(mats));
-for(const spec of cabinetSpecs){const cabinet=createCabinet({id:spec.id,width:spec.size[0],height:spec.size[1],depth:spec.size[2],seed:spec.seed,materials:mats});cabinet.position.set(...spec.position);cabinet.rotation.y=spec.rotation;installation.add(cabinet);register(cabinet,spec.id.replace('cabinet.','机箱 · '));}
+for(const spec of cabinetSpecs){const cabinet=createCabinet({id:spec.id,width:spec.size[0],height:spec.size[1],depth:spec.size[2],seed:spec.seed,materials:mats});cabinet.position.set(...spec.position);cabinet.rotation.y=spec.rotation;installation.add(cabinet);register(cabinet,spec.id.replace('cabinet.','CABINET / '));}
 const table=createTable(mats);installation.add(table.root);register(table.root);table.items.forEach(item=>register(item));
-const stool=createStool(mats);stool.position.set(-.06,0,1);installation.add(stool);register(stool,'中央 · 郁金香高脚椅');
+const stool=createStool(mats);stool.position.set(-.06,0,1);installation.add(stool);register(stool,'CENTER / TULIP STOOL');
 const cameraHardware=createCameraHardware(mats);cameraHardware.position.set(0,7.92,-2.12);installation.add(cameraHardware);register(cameraHardware);
 const composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));composer.addPass(new OutputPass());
 const grain=new ShaderPass({uniforms:{tDiffuse:{value:null},amount:{value:sceneSettings.grain}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:'uniform sampler2D tDiffuse;uniform float amount;varying vec2 vUv;float random(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}void main(){vec4 c=texture2D(tDiffuse,vUv);float n=(random(gl_FragCoord.xy)-.5)*amount;float vignette=1.0-.065*dot(vUv-.5,vUv-.5);gl_FragColor=vec4((c.rgb+n)*vignette,c.a);}'});composer.addPass(grain);
-const loadingManager=new THREE.LoadingManager();loadingManager.onProgress=(url,loaded,total)=>setBootProgress(12+loaded/total*68,`加载独立屏幕内容 ${loaded} / ${total}`);setBootProgress(6,'建立灯光、材质与机械结构…');
+const loadingManager=new THREE.LoadingManager();loadingManager.onProgress=(url,loaded,total)=>setBootProgress(12+loaded/total*68,`Loading individual display content ${loaded} / ${total}`);setBootProgress(6,'Building lighting, materials and mechanical structures...');
 const loader=new THREE.TextureLoader(loadingManager);
 async function loadTexture(url){const texture=await loader.loadAsync(url);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(renderer.capabilities.getMaxAnisotropy(),8);return texture;}
 const hardwareSpecs=[...registry.values()].filter(object=>['cabinet','instrument','camera'].includes(object.userData.kind)).map(object=>({id:object.userData.id,label:object.userData.label||object.name,position:object.position.toArray(),rotation:[object.rotation.x,object.rotation.y,object.rotation.z]}));
@@ -72,6 +80,9 @@ async function setScreenContent(id,source){const texture=await contentController
 let activeView='reference',selected=null,down=null,demoCanvas=null,demoId=null,cameraTransition=null,remote=null;
 const airFlight=createAirSpeciesState(),airViews=createAirSpeciesViews(),airViewStates=new Map(AIR_SCREEN_IDS.map(id=>[id,true]));
 let airReady=false,lastAirTime=null,lastAirFrame=-Infinity,lastAirTelemetry=-Infinity,renderSuspended=false;
+const marine=createMarineState(),marineAudio=createMarineAudio(),marineViews=createMarineViews({renderer});
+let lastMarineTime=null,lastMarineFrame=-Infinity,marineMicActive=false,marineRenderEnabled=true,lastMarineTelemetry=-Infinity;
+const marineChannels=new Map(MARINE_SCREEN_IDS.map(id=>[id,true]));
 function broadcastState(){remote?.sendState({selected,layout:store.snapshot(),view:activeView,uiVisible:!document.body.classList.contains('ui-hidden'),cameraActive:!!localMedia.get('screen.desk')?.camera});}
 const selectionBox=new THREE.BoxHelper(new THREE.Object3D(),0xe0e2c8);selectionBox.name='selection.outline';selectionBox.material.transparent=true;selectionBox.material.opacity=.42;selectionBox.visible=false;scene.add(selectionBox);
 function fittedFov(fov){return fov*Math.max(1,(1374/1145)/(innerWidth/innerHeight));}
@@ -99,16 +110,17 @@ function pickId(object){for(let current=object;current;current=current.parent){i
 function select(id){
  if(id!==null&&!registry.has(id))throw Error('Unknown position: '+id);selected=id;const object=id?registry.get(id):null;selectionBox.visible=!!object&&!document.body.classList.contains('ui-hidden');if(object)selectionBox.setFromObject(object);
  editor.show(id,object?.userData.label||id);
- airPanel.show(id);
+ airPanel.show(document.body.classList.contains('ui-hidden')?null:id);
+ marinePanel.show(document.body.classList.contains('ui-hidden')?null:id);
  if(object){const detail={id,object,anchor:object.getWorldPosition(new THREE.Vector3()).toArray()};window.dispatchEvent(new CustomEvent('future-plan:select',{detail}));selectionListeners.forEach(listener=>listener(detail));}broadcastState();return id;
 }
 function announce(message){const toast=document.querySelector('#toast');toast.textContent=message;toast.hidden=false;clearTimeout(announce.timer);announce.timer=setTimeout(()=>toast.hidden=true,4200);}
-function updateCameraButton(){const button=document.querySelector('#camera-toggle');if(button)button.textContent=localMedia.get('screen.desk')?.camera?'关闭摄像头':'打开摄像头';}
-function updateFlipButton(value=store.snapshot().screens['screen.desk'].display.flip){const button=document.querySelector('#flip-camera');if(button)button.textContent=value?'取消反转':'反转画面';}
+function updateCameraButton(){const button=document.querySelector('#camera-toggle');if(button)button.textContent=localMedia.get('screen.desk')?.camera?'STOP CAMERA':'START CAMERA';}
+function updateFlipButton(value=store.snapshot().screens['screen.desk'].display.flip){const button=document.querySelector('#flip-camera');if(button)button.textContent=value?'RESET FLIP':'FLIP CAMERA';}
 function flipCameraContent(){const display=store.snapshot().screens['screen.desk'].display;return setDisplay('screen.desk',{flip:!display.flip});}
 function releaseMedia(id){const media=localMedia.get(id);if(media){media.dispose();localMedia.delete(id);if(media.camera){updateCameraButton();broadcastState();}}}
 async function restoreScreenContent(id){
- const airTexture=airViews.textures.get(id);
+ const airTexture=airViews.textures.get(id)||marineViews.textures.get(id);
  releaseMedia(id);if(demoId===id){demoId=null;demoCanvas=null;}
  if(airTexture){
   // A retained live texture may still carry the previous session's mirrored UVs.
@@ -116,33 +128,36 @@ async function restoreScreenContent(id){
   await setScreenContent(id,airTexture);setDisplay(id,{mode:'live'});
  }else{contentController.restoreScreenContent(id);const mesh=displayMeshes.get(id);if(mesh)mesh.userData.flipBase=null;setDisplay(id,{mode:'image'});}
 }
-function drawDemo(time){if(!demoCanvas||!demoId)return;const context=demoCanvas.getContext('2d'),width=demoCanvas.width,height=demoCanvas.height;context.fillStyle='#102b3b';context.fillRect(0,0,width,height);context.strokeStyle='#81bdc8';context.lineWidth=1;for(let i=0;i<12;i++){context.beginPath();for(let x=0;x<width;x+=4){const y=height*.5+Math.sin(x*.012+time*.0008+i*.19)*Math.sin(x/width*Math.PI)*height*.25+(i-6)*7;x?context.lineTo(x,y):context.moveTo(x,y);}context.stroke();}context.fillStyle='#e1dac0';context.font='14px monospace';context.fillText(demoId,28,32);displayMeshes.get(demoId)?.material.map && (displayMeshes.get(demoId).material.map.needsUpdate=true);}
-async function contentDemo(id){if(airViews.textures.has(id)){restoreScreenContent(id);return;}if(demoId&&demoId!==id)restoreScreenContent(demoId);releaseMedia(id);demoCanvas=document.createElement('canvas');demoCanvas.width=800;demoCanvas.height=480;demoId=id;await setScreenContent(id,demoCanvas);setDisplay(id,{mode:'live'});drawDemo(performance.now());}
+function drawDemo(time){if(!demoCanvas||!demoId)return;const context=demoCanvas.getContext('2d'),width=demoCanvas.width,height=demoCanvas.height;context.fillStyle='#102b3b';context.fillRect(0,0,width,height);context.strokeStyle='#81bdc8';context.lineWidth=1;for(let i=0;i<12;i++){context.beginPath();for(let x=0;x<width;x+=4){const y=height*.5+Math.sin(x*.012+time*.0008+i*.19)*Math.sin(x/width*Math.PI)*height*.25+(i-6)*7;x?context.lineTo(x,y):context.moveTo(x,y);}context.stroke();}context.fillStyle='#e1dac0';context.font='14px "FS Pixel"';context.fillText(demoId,28,32);displayMeshes.get(demoId)?.material.map && (displayMeshes.get(demoId).material.map.needsUpdate=true);}
+async function contentDemo(id){if(airViews.textures.has(id)||marineViews.textures.has(id)){await restoreScreenContent(id);return;}if(demoId&&demoId!==id)restoreScreenContent(demoId);releaseMedia(id);demoCanvas=document.createElement('canvas');demoCanvas.width=800;demoCanvas.height=480;demoId=id;await setScreenContent(id,demoCanvas);setDisplay(id,{mode:'live'});drawDemo(performance.now());}
 function fitTexture(id,texture,aspect){const spec=screens.find(item=>item.id===id),screenAspect=(spec.size[0]-spec.bezel*2)/(spec.size[1]-spec.bezel*2);texture.repeat.set(1,1);texture.offset.set(0,0);if(aspect>screenAspect){texture.repeat.x=screenAspect/aspect;texture.offset.x=(1-texture.repeat.x)/2;}else{texture.repeat.y=aspect/screenAspect;texture.offset.y=(1-texture.repeat.y)/2;}texture.needsUpdate=true;}
 async function uploadContent(id,file){if(demoId===id){demoId=null;demoCanvas=null;}const media=await createLocalMedia(file);fitTexture(id,media.texture,media.aspect);await setScreenContent(id,media.texture);releaseMedia(id);localMedia.set(id,media);setDisplay(id,{mode:media.video?'video':'image'});broadcastState();return media;}
 async function setMode(id,mode){if(mode==='image')restoreScreenContent(id);else if(mode==='live')await contentDemo(id);else setDisplay(id,{mode});}
 async function toggleCamera(){
- if(localMedia.get('screen.desk')?.camera){restoreScreenContent('screen.desk');announce('摄像头已关闭。');return false;}
- if(!navigator.mediaDevices?.getUserMedia)throw new Error('摄像头需要 localhost 或 HTTPS 安全连接，以及浏览器权限。');
- announce('正在请求摄像头权限，请在浏览器系统提示中允许。');
+ if(localMedia.get('screen.desk')?.camera){restoreScreenContent('screen.desk');announce('Camera stopped.');return false;}
+ if(!navigator.mediaDevices?.getUserMedia)throw new Error('The camera requires localhost or HTTPS and browser permission.');
+ announce('Requesting camera access. Please allow it in the browser prompt.');
  const stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720},facingMode:'user'},audio:false});
  try{
   const video=document.createElement('video');video.muted=true;video.playsInline=true;video.srcObject=stream;await video.play();
   const texture=new THREE.VideoTexture(video);texture.colorSpace=THREE.SRGBColorSpace;fitTexture('screen.desk',texture,video.videoWidth/video.videoHeight);await setScreenContent('screen.desk',texture);
-  releaseMedia('screen.desk');localMedia.set('screen.desk',{camera:true,video,dispose(){stream.getTracks().forEach(track=>track.stop());texture.dispose();}});setDisplay('screen.desk',{mode:'video'});updateCameraButton();broadcastState();announce('摄像头已连接，画面显示在中央主屏右侧。');return true;
+  releaseMedia('screen.desk');localMedia.set('screen.desk',{camera:true,video,dispose(){stream.getTracks().forEach(track=>track.stop());texture.dispose();}});setDisplay('screen.desk',{mode:'video'});updateCameraButton();broadcastState();announce('Camera connected to the display beside the center screen.');return true;
  }catch(error){stream.getTracks().forEach(track=>track.stop());throw error;}
 }
 const editor=createEditor({specs:screens,store,onTransform:applyTransform,onDisplay:setDisplay,onMode:(id,mode)=>setMode(id,mode).catch(error=>editor.say(error.message,true)),onUpload:uploadContent,onDemo:id=>contentDemo(id).catch(error=>editor.say(error.message,true)),onRestore:restoreScreenContent,onReset:id=>{const spec=screens.find(item=>item.id===id)||hardwareSpecs.find(item=>item.id===id);if(spec)applyTransform(id,{position:[...spec.position],rotation:[...spec.rotation]});},onSaveProject:async()=>{
- const response=await fetch('./api/layout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(store.snapshot())});if(!response.ok)throw new Error('项目写入仅在 npm run dev 下可用；静态部署请使用“导出 JSON”。');
+ const response=await fetch('./api/layout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(store.snapshot())});if(!response.ok)throw new Error('Saving to the project requires npm run dev; use Export JSON on static hosting.');
 },onImport:layout=>{store.replace(layout);const state=store.snapshot();for(const spec of screens){applyTransform(spec.id,state.screens[spec.id],false);applyDisplay(spec.id,state.screens[spec.id].display);}for(const spec of hardwareSpecs)applyTransform(spec.id,state.hardware[spec.id],false);editor.sync();}});
 async function setAirViewState(id,enabled){if(!airViewStates.has(id))return;airViewStates.set(id,enabled);if(enabled)await setScreenContent(id,airViews.textures.get(id));setDisplay(id,{mode:enabled?'live':'blank'});remote?.sendState(airTelemetry(airFlight.state,airViewStates));}
 async function resetAirFlight(){airFlight.reset();for(const id of AIR_SCREEN_IDS)airViewStates.set(id,true);await Promise.all(AIR_SCREEN_IDS.filter(id=>displayMeshes.has(id)).map(restoreScreenContent));airViews.render(airFlight.state);airPanel.update(airFlight.state);}
 const airPanel=createAirSpeciesPanel({flight:airFlight,onReset:resetAirFlight});
+const marinePanel=createMarinePanel({marine,audio:marineAudio});
 const dataBridge=createDataBridge({setDisplay,setContent:(id,content)=>setScreenContent(id,content?.url||content),onError:error=>editor.say(error.message,true)});
 async function handleRemoteControl(message){
  if(!message?.type)return;
- if(message.type==='suspendScene'){renderSuspended=!!message.suspend;lastAirTime=null;return renderSuspended;}
- if(message.type==='openAirViews'){renderSuspended=true;location.assign('./air.html');return true;}
+ if(message.type==='suspendScene'){renderSuspended=!!message.suspend;lastAirTime=null;lastMarineTime=null;if(renderSuspended)marinePanel.stop();return renderSuspended;}
+ if(message.type==='openMarineViews'){marinePanel.stop();location.assign('./marine.html');return true;}
+ if(message.type.startsWith('marine'))return applyMarineRemoteControl({message,marine,panel:marinePanel,onTelemetry:()=>remote?.sendState(marineTelemetry(marine,marineChannels)),onChannel:async(id,enabled)=>{if(!marineChannels.has(id))return false;marineChannels.set(id,enabled);if(enabled)await restoreScreenContent(id);else setDisplay(id,{mode:'blank'});return true;}});
+ if(message.type==='openAirViews'){renderSuspended=true;marinePanel.stop();location.assign('./air.html');return true;}
  if(message.type.startsWith('air'))return applyAirRemoteControl({flight:airFlight,message,onReset:resetAirFlight,onTelemetry:()=>remote?.sendState(airTelemetry(airFlight.state,airViewStates)),onViewState:setAirViewState});
  if(message.type==='select')return select(message.id);
  if(message.type==='view')return chooseView(message.name);
@@ -157,22 +172,22 @@ async function handleRemoteControl(message){
  if(message.type==='cameraMove'){
   cameraTransition=null;const offset=camera.position.clone().sub(controls.target),spherical=new THREE.Spherical().setFromVector3(offset);spherical.theta-=Number(message.dx||0)*.005;spherical.phi=THREE.MathUtils.clamp(spherical.phi-Number(message.dy||0)*.005,.08,Math.PI*.49);spherical.radius=THREE.MathUtils.clamp(spherical.radius*Number(message.zoom||1),controls.minDistance,controls.maxDistance);camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(spherical));controls.update();activeView='custom';return;
  }
- if(message.type==='upload'){const response=await fetch(message.url);if(!response.ok)throw new Error('移动端媒体传输失败。');const blob=await response.blob(),file=new File([blob],decodeURIComponent(message.name||'media'),{type:blob.type});return uploadContent(message.id,file);}
+ if(message.type==='upload'){const response=await fetch(message.url);if(!response.ok)throw new Error('Remote media transfer failed.');const blob=await response.blob(),file=new File([blob],decodeURIComponent(message.name||'media'),{type:blob.type});return uploadContent(message.id,file);}
 }
 remote=createRemoteChannel({onControl:message=>handleRemoteControl(message).catch(error=>{editor.say(error.message,true);announce(error.message);})});
-const raycaster=new THREE.Raycaster();canvas.addEventListener('pointerdown',event=>down={x:event.clientX,y:event.clientY});canvas.addEventListener('pointercancel',()=>down=null);canvas.addEventListener('pointerup',event=>{if(!down)return;if(Math.hypot(event.clientX-down.x,event.clientY-down.y)<=5){const rect=canvas.getBoundingClientRect();raycaster.setFromCamera(new THREE.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),camera);const displayHit=raycaster.intersectObjects([...displayMeshes.values()],false)[0];const hit=displayHit||raycaster.intersectObjects([...registry.values()],true).find(item=>pickId(item.object));select(hit?pickId(hit.object):null);}down=null;});
+const raycaster=new THREE.Raycaster();canvas.addEventListener('pointerdown',event=>down={x:event.clientX,y:event.clientY});canvas.addEventListener('pointercancel',()=>down=null);canvas.addEventListener('pointerup',event=>{if(!down)return;if(Math.hypot(event.clientX-down.x,event.clientY-down.y)<=5){const rect=canvas.getBoundingClientRect();raycaster.setFromCamera(new THREE.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),camera);const displayHit=raycaster.intersectObjects([...displayMeshes.values()],false)[0];const hit=displayHit||raycaster.intersectObjects([...registry.values()],true).find(item=>pickId(item.object));select(hit?pickId(hit.object):null);if(displayHit&&pickId(displayHit.object)==='screen.right.03'&&displayHit.uv){const id=archiveSpeciesAt(displayHit.uv.x,displayHit.uv.y);if(id)marinePanel.inspect(id);}}down=null;});
 canvas.addEventListener('future-plan:clear-selection',()=>select(null));
 document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>chooseView(button.dataset.view)));
-function setUIVisible(visible){document.body.classList.toggle('ui-hidden',!visible);selectionBox.visible=!!selected&&visible;airPanel.show(visible?selected:null);if(!visible){airFlight.releaseInput();airFlight.releaseFieldInput();}broadcastState();}
+function setUIVisible(visible){document.body.classList.toggle('ui-hidden',!visible);selectionBox.visible=!!selected&&visible;airPanel.show(visible?selected:null);marinePanel.show(visible?selected:null);if(!visible){airFlight.releaseInput();airFlight.releaseFieldInput();}broadcastState();}
 document.querySelector('#hide-ui').addEventListener('click',()=>setUIVisible(false));
 document.querySelector('#camera-toggle').addEventListener('click',()=>toggleCamera().catch(error=>{announce(error.message);editor.say(error.message,true);}));
 document.querySelector('#flip-camera').addEventListener('click',flipCameraContent);
 addEventListener('keydown',event=>{if(event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement)return;const view=['reference','front','left','right','back','top','seat'][Number(event.key)-1];if(view)chooseView(view);if(event.key.toLowerCase()==='h')setUIVisible(document.body.classList.contains('ui-hidden'));if(event.key==='Escape')select(null);});
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.fov=fittedFov(views[activeView]?.fov||camera.fov);camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight);});
-document.addEventListener('visibilitychange',()=>{lastAirTime=null;if(document.hidden){airFlight.releaseInput();airFlight.releaseFieldInput();}for(const media of localMedia.values()){if(media.video){if(document.hidden)media.video.pause();else media.video.play().catch(()=>{});}}});
+document.addEventListener('visibilitychange',()=>{lastAirTime=null;lastMarineTime=null;if(document.hidden){marinePanel.stop();airFlight.releaseInput();airFlight.releaseFieldInput();}for(const media of localMedia.values()){if(media.video){if(document.hidden)media.video.pause();else media.video.play().catch(()=>{});}}});
 async function boot(){
  try{
-  setBootProgress(8,'读取场景与独立屏幕配置…');
+  setBootProgress(8,'Reading the scene and individual display settings...');
   try{
    const response=await fetch('./api/layout');if(response.ok){const layout=await response.json();if(layout)store.replace(layout);}
   }catch{}
@@ -184,25 +199,39 @@ async function boot(){
   if(displayMeshes.size!==12)throw Error('Expected 12 screens');
   airViews.render(airFlight.state);
   for(const id of AIR_SCREEN_IDS){await setScreenContent(id,airViews.textures.get(id));if(state.screens[id].display.mode!=='blank')setDisplay(id,{mode:'live'});}
+  marineViews.render(marine.state);
+  for(const id of MARINE_SCREEN_IDS){await setScreenContent(id,marineViews.textures.get(id));if(state.screens[id].display.mode!=='blank')setDisplay(id,{mode:'live'});}
   airReady=true;
-  setBootProgress(84,'连接支架、线缆与落地线束…');
+  setBootProgress(84,'Connecting mounts, cables and floor looms...');
   scene.updateMatrixWorld(true);mounts=createMounts(mats,registry);installation.add(mounts.root);mounts.updateAll();
-  setBootProgress(91,'预编译玻璃、CRT 与后期着色器…');
+  setBootProgress(91,'Compiling glass, CRT and postprocessing shaders...');
   if(renderer.compileAsync)await renderer.compileAsync(scene,camera);else renderer.compile(scene,camera);
-  setBootProgress(97,'确认完整三维首帧…');
+  setBootProgress(97,'Verifying the first complete 3D frame...');
   composer.render();renderer.getContext().finish();
-  setBootProgress(100,'12 块屏幕与控制台已就绪');
+  setBootProgress(100,'12 displays and console ready');
   document.body.classList.remove('is-booting');loading.style.opacity=0;setTimeout(()=>loading.remove(),600);return true;
- }catch(error){fatal('资源或 WebGL 场景加载失败：'+error.message);console.error(error);return false;}
+ }catch(error){fatal('Assets or WebGL scene failed to load:'+error.message);console.error(error);return false;}
 }
 const ready=boot().then(result=>{if(result)broadcastState();return result;});
 const airSpecies={screenIds:[...AIR_SCREEN_IDS],setInput:airFlight.setInput,releaseInput:airFlight.releaseInput,setFieldInput:airFlight.setFieldInput,releaseFieldInput:airFlight.releaseFieldInput,setParameters:airFlight.setParameters,reset:resetAirFlight,snapshot:airFlight.snapshot,diagnostics(){return{...airViews.diagnostics?.(),channels:AIR_SCREEN_IDS.map(id=>({id,attached:displayMeshes.get(id)?.material.map===airViews.textures.get(id),mode:store.snapshot().screens[id].display.mode})),state:airFlight.snapshot()};}};
 window.futurePlan={ready,scene,camera,renderer,controls,registry,screens:displayMeshes,materials:mats,settings:sceneSettings,layout:store,setView:chooseView,select,onSelect(listener){if(typeof listener!=='function')throw new TypeError('callback must be a function');selectionListeners.add(listener);return()=>selectionListeners.delete(listener);},getObject:id=>registry.get(id),getAnchor(id){const object=registry.get(id);if(!object)throw Error('Unknown position: '+id);return object.getWorldPosition(new THREE.Vector3()).toArray();},setScreenTransform:applyTransform,setScreenDisplay:setDisplay,setScreenContent,restoreScreenContent,contentDemo,toggleCamera,remoteControl:handleRemoteControl,connectDataChannel:dataBridge.connect,applyData:dataBridge.apply,setUIVisible,capture(){composer.render();return canvas.toDataURL('image/png');},diagnostics(){let meshes=0,transparent=0;scene.traverse(object=>{if(object.isMesh)meshes++;if(object.material?.transmission>0)transparent++;});return{screenCount:displayMeshes.size,interactiveIds:[...registry.keys()],meshes,transparentParts:transparent,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,view:activeView,selected,mounts:mounts?.diagnostics(),layout:store.snapshot(),renderer:renderer.getContext().getParameter(renderer.getContext().RENDERER),canvas:[canvas.width,canvas.height]};}};
 renderer.setAnimationLoop(time=>{
- if(document.hidden||renderSuspended){lastTime=null;lastAirTime=null;return;}
+ if(document.hidden||renderSuspended){lastAirTime=null;lastMarineTime=null;return;}
  if(airReady){const dt=lastAirTime===null?0:Math.min((time-lastAirTime)/1000,.1);lastAirTime=time;airFlight.step(dt);if(time-lastAirFrame>=1000/30){airViews.render(airFlight.state,id=>airViewStates.get(id));airPanel.update(airFlight.state);lastAirFrame=time;}if(time-lastAirTelemetry>100){remote?.sendState(airTelemetry(airFlight.state,airViewStates));lastAirTelemetry=time;}}
+ if(airReady){
+  const dt=lastMarineTime===null?0:Math.min((time-lastMarineTime)/1000,.1);lastMarineTime=time;
+  if(marineMicActive&&!['listening','ready'].includes(marineAudio.status))marine.stop();
+  marineMicActive=marineAudio.status==='listening';
+  if(time-lastMarineTelemetry>250){remote?.sendState(marineTelemetry(marine,marineChannels));lastMarineTelemetry=time;}
+  const phase=marine.state.phase;marine.step(dt,marineAudio.update());
+  if(phase!=='ECHO'&&marine.state.phase==='ECHO')marineAudio.respond(marine.state.species);
+  if(phase==='COOLDOWN'&&marine.state.phase==='LISTENING'&&marineAudio.status==='ready')marineAudio.stop();
+  if(time-lastMarineFrame>=1000/24){if(marineRenderEnabled)marineViews.render(marine.state);marinePanel.update();lastMarineFrame=time;}
+ }
  if(cameraTransition){const progress=Math.min(1,(time-cameraTransition.startTime)/cameraTransition.duration),ease=progress<.5?4*progress**3:1-(-2*progress+2)**3/2;camera.position.lerpVectors(cameraTransition.from.position,cameraTransition.to.position,ease);controls.target.lerpVectors(cameraTransition.from.target,cameraTransition.to.target,ease);camera.fov=THREE.MathUtils.lerp(cameraTransition.from.fov,cameraTransition.to.fov,ease);camera.updateProjectionMatrix();if(progress===1)cameraTransition=null;}
  controls.update();drawDemo(time);if(selectionBox.visible)selectionBox.setFromObject(registry.get(selected));renderer.info.reset();composer.render();
 });
 window.futurePlan.airSpecies=airSpecies;
-addEventListener('beforeunload',()=>{dataBridge.close();airPanel.dispose();airViews.dispose();for(const id of localMedia.keys())releaseMedia(id);});
+window.futurePlan.marineSpecies={sessionId:marine.sessionId,screenIds:[...MARINE_SCREEN_IDS],snapshot:marine.snapshot,simulate:marinePanel.simulate,inspect:marinePanel.inspect,stop:marinePanel.stop,setRendering(enabled){marineRenderEnabled=!!enabled;if(marineRenderEnabled)lastMarineFrame=-Infinity;return marineRenderEnabled;},diagnostics(){return{...marineViews.diagnostics(),audio:marineAudio.diagnostics(),state:marine.snapshot(),channels:MARINE_SCREEN_IDS.map(id=>({id,attached:displayMeshes.get(id)?.material.map===marineViews.textures.get(id),mode:store.snapshot().screens[id].display.mode}))};}};
+addEventListener('pagehide',()=>marinePanel.stop());
+addEventListener('beforeunload',()=>{dataBridge.close();marinePanel.dispose();marineViews.dispose();marineAudio.dispose();airPanel.dispose();airViews.dispose();for(const id of localMedia.keys())releaseMedia(id);});

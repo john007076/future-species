@@ -93,7 +93,7 @@ export function createAirSpeciesViews(options = {}) {
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.generateMipmaps = false;
     texture.minFilter = texture.magFilter = THREE.LinearFilter;
-    return [id, {canvas, ctx: canvas.getContext('2d'), texture, sky: sky(width, height, id === 'screen.left.03')}];
+    return [id, {id,orbitBuffer:canvasOf(width,height),canvas, ctx: canvas.getContext('2d'), texture, sky: sky(width, height, id === 'screen.left.03')}];
   }));
   const textures = new Map([...entries].map(([id, entry]) => [id, entry.texture]));
   const specimen = canvasOf(1024, 1024), specimenContext = specimen.getContext('2d');
@@ -189,6 +189,10 @@ export function createAirSpeciesViews(options = {}) {
 
   function finish(entry, state, heading, footer, dark = false) {
     const {ctx, canvas} = entry, {width: w, height: h} = canvas;
+    const view=state.viewTransforms?.[entry.id];
+    if(view&&(view.yaw||view.pitch||view.zoom!==1)){
+      entry.orbitBuffer.getContext('2d').drawImage(canvas,0,0);ctx.drawImage(entry.sky,0,0);ctx.save();ctx.translate(w/2,h/2);ctx.rotate(view.yaw);ctx.scale(view.zoom,view.zoom*Math.max(.35,Math.cos(view.pitch)));ctx.drawImage(entry.orbitBuffer,-w/2,-h/2);ctx.restore();
+    }
     ctx.save();
     ctx.globalAlpha = .37;
     ctx.fillStyle = ctx.createPattern(filmGrain, 'repeat');
@@ -198,13 +202,11 @@ export function createAirSpeciesViews(options = {}) {
     const vignette = ctx.createRadialGradient(w * .5, h * .44, w * .18, w * .5, h * .46, Math.max(w, h) * .73);
     vignette.addColorStop(0, 'rgba(24,47,62,0)'); vignette.addColorStop(1, 'rgba(24,47,62,.17)');
     ctx.fillStyle = vignette; ctx.fillRect(0, 0, w, h);
-    if (!options.hideText) {
-      ctx.fillStyle = dark ? 'rgba(231,236,222,.75)' : 'rgba(37,60,72,.73)';
-      ctx.font = `${w >= 600 ? 12 : 10}px monospace`;
-      ctx.fillText(heading, 24, 29);
-      ctx.font = `${w >= 600 ? 10 : 9}px monospace`;
-      ctx.fillText(footer, 24, h - 22);
-    }
+    ctx.fillStyle = dark ? 'rgba(231,236,222,.75)' : 'rgba(37,60,72,.73)';
+    ctx.font = `${w >= 600 ? 12 : 10}px monospace`;
+    ctx.fillText(heading, 24, 29);
+    ctx.font = `${w >= 600 ? 10 : 9}px monospace`;
+    ctx.fillText(footer, 24, h - 22);
     entry.texture.needsUpdate = true;
   }
 
@@ -219,8 +221,7 @@ export function createAirSpeciesViews(options = {}) {
     }
     ctx.strokeStyle='rgba(75,108,122,.095)';ctx.lineWidth=.8;ctx.stroke(flowLines);
     // The viewport stays fixed: input moves the actual organism through this sky.
-    const scale = options.focus ? Math.min(w, h) * 1.2 : w * 1.03;
-    const size = scale * (1 + state.z * .07), x = w * .5 + state.x * w * .105, y = h * .5 - state.y * h * .115;
+    const size = w * 1.03 * (1 + state.z * .07), x = w * .5 + state.x * w * .105, y = h * .5 - state.y * h * .115;
     for (let i = 0; i < 34; i++) {
       const px = ((noise(i + 50) * w + state.time * (4 + state.wind.x * 6) + w * 100) % w);
       const py = ((noise(i + 80) * h - state.time * state.wind.y * 4 + h * 100) % h);
@@ -262,7 +263,7 @@ export function createAirSpeciesViews(options = {}) {
       x === 24 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     }
     ctx.stroke();
-    ctx.fillStyle = 'rgba(39,64,76,.65)'; ctx.font = '10px monospace';
+    ctx.fillStyle = 'rgba(39,64,76,.65)'; ctx.font = '10px "FS Pixel"';
     ctx.fillText('FLOW '+state.speed.toFixed(2), 24, h * .9);
     ctx.fillText('FIELD '+Math.round(state.field.strength*100)+'%', w - 112, h * .9);
     finish(entry, state, 'SP—01  /  AIR CURRENT', 'VELOCITY · VORTEX · ATTRACTION');
@@ -296,7 +297,7 @@ export function createAirSpeciesViews(options = {}) {
     textures,
     render(state, enabled = () => true) {
       if (disposed || !channels.some(([id]) => entries.has(id) && enabled(id))) return;
-      drawSpecimen(state);
+      if (['screen.upper_left', 'screen.portrait_left', 'screen.left.03'].some(id => entries.has(id) && enabled(id))) drawSpecimen(state);
       if (entries.has('screen.upper_left') && enabled('screen.upper_left')) drawMain(state);
       if (entries.has('screen.portrait_left') && enabled('screen.portrait_left')) drawDetail(state);
       if (entries.has('screen.left.02') && enabled('screen.left.02')) drawSignal(state);
@@ -309,7 +310,7 @@ export function createAirSpeciesViews(options = {}) {
     dispose() {
       if (disposed) return;
       disposed = true;
-      for (const entry of entries.values()) { entry.texture.dispose(); entry.canvas.width = entry.canvas.height = 0; entry.sky.width = entry.sky.height = 0; }
+      for (const entry of entries.values()) { entry.texture.dispose(); entry.canvas.width = entry.canvas.height = 0; entry.sky.width = entry.sky.height = entry.orbitBuffer.width = entry.orbitBuffer.height = 0; }
       specimen.width = specimen.height = filmGrain.width = filmGrain.height = 0;
       membrane.width=membrane.height=0;
     },

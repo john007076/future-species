@@ -20,7 +20,7 @@ export const screens = [
     ],
     "bezel": 0.17,
     "acrylic": 0.18,
-    "label": "左上 · AIR 飞行全景"
+    "label": "UPPER LEFT / AIR FLIGHT"
   },
   {
     "id": "screen.upper_center",
@@ -42,7 +42,7 @@ export const screens = [
     ],
     "bezel": 0.16,
     "acrylic": 0.16,
-    "label": "上中 · 海上日月"
+    "label": "UPPER CENTER / SUN AND MOON"
   },
   {
     "id": "screen.upper_right",
@@ -64,7 +64,7 @@ export const screens = [
     ],
     "bezel": 0.17,
     "acrylic": 0.17,
-    "label": "右上 · 行星"
+    "label": "UPPER RIGHT / MARINE ENCOUNTER"
   },
   {
     "id": "screen.center_main",
@@ -86,7 +86,7 @@ export const screens = [
     ],
     "bezel": 0.14,
     "acrylic": 0.12,
-    "label": "中央 · 花朵"
+    "label": "CENTER / FLOWER"
   },
   {
     "id": "screen.portrait_left",
@@ -108,7 +108,7 @@ export const screens = [
     ],
     "bezel": 0.13,
     "acrylic": 0.13,
-    "label": "左侧竖屏 · AIR 羽枝微距"
+    "label": "PORTRAIT LEFT / AIR FIBRE"
   },
   {
     "id": "screen.left.01",
@@ -130,7 +130,7 @@ export const screens = [
     ],
     "bezel": 0.12,
     "acrylic": 0.08,
-    "label": "左翼 01 · 风景"
+    "label": "LEFT 01 / LANDSCAPE"
   },
   {
     "id": "screen.left.02",
@@ -152,7 +152,7 @@ export const screens = [
     ],
     "bezel": 0.13,
     "acrylic": 0.08,
-    "label": "左翼 02 · AIR 气流信号"
+    "label": "LEFT 02 / AIR CURRENT"
   },
   {
     "id": "screen.left.03",
@@ -174,7 +174,7 @@ export const screens = [
     ],
     "bezel": 0.13,
     "acrylic": 0.08,
-    "label": "左翼 03 · AIR 飞行轨迹"
+    "label": "LEFT 03 / AIR TRACE"
   },
   {
     "id": "screen.right.01",
@@ -196,7 +196,7 @@ export const screens = [
     ],
     "bezel": 0.13,
     "acrylic": 0.08,
-    "label": "右翼 01 · 海面"
+    "label": "RIGHT 01 / MARINE SOUND LIFE"
   },
   {
     "id": "screen.right.02",
@@ -218,7 +218,7 @@ export const screens = [
     ],
     "bezel": 0.13,
     "acrylic": 0.08,
-    "label": "右翼 02 · 线框球"
+    "label": "RIGHT 02 / MARINE TISSUE"
   },
   {
     "id": "screen.right.03",
@@ -240,7 +240,7 @@ export const screens = [
     ],
     "bezel": 0.14,
     "acrylic": 0.08,
-    "label": "右翼 03 · 点云"
+    "label": "RIGHT 03 / MARINE INDEX"
   },
   {
     "id": "screen.desk",
@@ -262,7 +262,7 @@ export const screens = [
     ],
     "bezel": 0.055,
     "acrylic": 0.025,
-    "label": "中央右侧 · 摄像头画面"
+    "label": "CENTER RIGHT / CAMERA"
   }
 ];
 export const seatFocus=[0,2.9,1];

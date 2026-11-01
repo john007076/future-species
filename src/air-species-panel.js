@@ -6,8 +6,8 @@ const CHANNELS = {
   'screen.left.02': '03 / AIRFLOW',
   'screen.left.03': '04 / TRACE',
 };
-const BEHAVIOURS = {floating: '自主漂浮', responding: '跟随气流', gliding: '惯性滑行'};
-const FIELD_BEHAVIOURS = {resting: '等待触碰', attracting: '吸附与流动', relaxing: '余流回弹'};
+const BEHAVIOURS = {floating: 'Floating', responding: 'Following airflow', gliding: 'Gliding'};
+const FIELD_BEHAVIOURS = {resting: 'Waiting for touch', attracting: 'Attraction and flow', relaxing: 'Relaxing'};
 const clamp = value => Math.max(-1, Math.min(1, value));
 const signed = value => (value >= 0 ? '+' : '−') + Math.abs(value).toFixed(2);
 
@@ -15,39 +15,39 @@ export function createAirSpeciesPanel({flight, onReset}) {
   const element = document.createElement('aside');
   element.id = 'air-species-panel';
   element.hidden = true;
-  element.setAttribute('aria-label', 'AIR SPECIES 飞行与形态控制');
+  element.setAttribute('aria-label', 'AIR SPECIES Flight and morph controls');
   element.innerHTML = `
     <header class="air-heading">
       <div><small>LIVING STUDY / SP–01</small><h2>AIR SPECIES</h2></div>
       <span class="air-indicator" aria-hidden="true"></span>
     </header>
     <div class="air-channel"><span>FOUR LINKED VIEWS</span><strong data-air-channel></strong></div>
-    <a class="air-open-focus" href="./air.html">进入四路生命画面 <span aria-hidden="true">↗</span></a>
-    <div class="air-pad-heading"><span>FLIGHT FIELD</span><span>位置与高度</span></div>
-    <div class="air-xy-pad" data-air-pad="flight" tabindex="0" role="group" aria-label="二维飞行控制，左右改变位置，上下改变高度" aria-describedby="air-pad-help">
+    <a class="air-open-focus" href="./air.html">OPEN FOUR VIEWS <span aria-hidden="true">↗</span></a>
+    <div class="air-pad-heading"><span>FLIGHT FIELD</span><span>POSITION / ALTITUDE</span></div>
+    <div class="air-xy-pad" data-air-pad="flight" tabindex="0" role="group" aria-label="Flight pad: horizontal movement changes position; vertical movement changes altitude" aria-describedby="air-pad-help">
       <span class="air-axis air-axis-x" aria-hidden="true"></span><span class="air-axis air-axis-y" aria-hidden="true"></span>
       <span class="air-pad-label air-pad-top" aria-hidden="true">RISE</span><span class="air-pad-label air-pad-bottom" aria-hidden="true">DESCEND</span>
       <span class="air-pad-position" aria-hidden="true"></span><span class="air-pad-target" aria-hidden="true"></span>
     </div>
-    <div class="air-coordinates"><span>X <output data-air-x>+0.00</output></span><span>Y <output data-air-y>+0.00</output></span><span data-air-behaviour>自主漂浮</span></div>
-    <div class="air-pad-heading air-morph-heading"><span>MORPH FIELD</span><span>吸附与流动</span></div>
-    <div class="air-xy-pad air-field-pad" data-air-pad="field" tabindex="0" role="group" aria-label="形态触控板，移动吸附场影响羽枝和流体" aria-describedby="air-field-help air-pad-help">
+    <div class="air-coordinates"><span>X <output data-air-x>+0.00</output></span><span>Y <output data-air-y>+0.00</output></span><span data-air-behaviour>Floating</span></div>
+    <div class="air-pad-heading air-morph-heading"><span>MORPH FIELD</span><span>Attraction and flow</span></div>
+    <div class="air-xy-pad air-field-pad" data-air-pad="field" tabindex="0" role="group" aria-label="Morph pad: move the attraction field to affect fibres and fluid" aria-describedby="air-field-help air-pad-help">
       <span class="air-axis air-axis-x" aria-hidden="true"></span><span class="air-axis air-axis-y" aria-hidden="true"></span>
       <span class="air-field-influence" aria-hidden="true"></span>
       <span class="air-pad-position" aria-hidden="true"></span><span class="air-pad-target" aria-hidden="true"></span>
     </div>
-    <div class="air-field-meta"><span data-air-field-status>等待触碰</span><span>吸附 <output data-air-field-strength>0%</output></span></div>
-    <p id="air-field-help">按住聚拢羽枝 · 拖动牵引 · 松开回弹</p>
-    <p id="air-pad-help" class="air-sr-only">两个触控板可独立拖动或同时触摸。方向键微调当前触控板，Home 回到中心。第一块控制飞行，第二块控制身体内的吸附场。</p>
+    <div class="air-field-meta"><span data-air-field-status>Waiting for touch</span><span>Attraction <output data-air-field-strength>0%</output></span></div>
+    <p id="air-field-help">HOLD TO GATHER · DRAG TO PULL<br>RELEASE TO RELAX</p>
+    <p id="air-pad-help" class="air-sr-only">Use either pad or both together. Arrow keys adjust the selected pad; Home resets it. The first pad controls flight, the second controls the internal morph field.</p>
     <div class="air-parameters air-morph-parameters">
-      <label><span>Attraction <small>吸附强度</small></span><output data-air-value="attraction"></output><input type="range" min="0" max="1" step="0.01" data-air-param="attraction" aria-label="Attraction 吸附强度"/></label>
-      <label><span>Fluidity <small>流动性</small></span><output data-air-value="fluidity"></output><input type="range" min="0" max="1" step="0.01" data-air-param="fluidity" aria-label="Fluidity 流动性"/></label>
+      <label><span>ATTRACTION</span><output data-air-value="attraction"></output><input type="range" min="0" max="1" step="0.01" data-air-param="attraction" aria-label="Attraction"/></label>
+      <label><span>FLUIDITY</span><output data-air-value="fluidity"></output><input type="range" min="0" max="1" step="0.01" data-air-param="fluidity" aria-label="Fluidity"/></label>
     </div>
-    <details class="air-flight-tuning"><summary>Flight Tuning <span>飞行参数</span></summary>
+    <details class="air-flight-tuning"><summary>FLIGHT TUNING</summary>
       <div class="air-parameters">
-        <label><span>Motion Response</span><output data-air-value="response"></output><input type="range" min="0" max="1" step="0.01" data-air-param="response" aria-label="Motion Response 飞行响应"/></label>
-        <label><span>Feather Dynamics</span><output data-air-value="feather"></output><input type="range" min="0" max="1" step="0.01" data-air-param="feather" aria-label="Feather Dynamics 羽毛动态"/></label>
-        <label><span>Drift</span><output data-air-value="drift"></output><input type="range" min="0" max="1" step="0.01" data-air-param="drift" aria-label="Drift 自主漂移"/></label>
+        <label><span>Motion Response</span><output data-air-value="response"></output><input type="range" min="0" max="1" step="0.01" data-air-param="response" aria-label="Motion Response Motion response"/></label>
+        <label><span>Feather Dynamics</span><output data-air-value="feather"></output><input type="range" min="0" max="1" step="0.01" data-air-param="feather" aria-label="Feather Dynamics Fibre dynamics"/></label>
+        <label><span>Drift</span><output data-air-value="drift"></output><input type="range" min="0" max="1" step="0.01" data-air-param="drift" aria-label="Drift Drift"/></label>
       </div>
       <div class="air-speed">FLIGHT SPEED <output data-air-speed>0.00</output></div>
     </details>
@@ -171,7 +171,7 @@ export function createAirSpeciesPanel({flight, onReset}) {
       else flight.reset();
       update(flight.state, true);
     } catch {
-      behaviour.textContent = '重置失败，请重试';
+      behaviour.textContent = 'Reset failed. Please retry';
       currentMode = null;
     } finally { button.disabled = false; }
   });

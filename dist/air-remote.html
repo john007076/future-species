@@ -1,20 +1,21 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
  <meta charset="UTF-8"/>
  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
  <meta name="theme-color" content="#d7d5cc"/>
  <link rel="icon" href="data:,"/>
  <title>AIR SPECIES / SP–01 · Remote</title>
-  <script type="module" crossorigin src="./assets/airRemote-DKoyPCHM.js"></script>
+  <script type="module" crossorigin src="./assets/airRemote-DwDo5ijB.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/remote-channel-BP9wtIJW.js">
-  <link rel="modulepreload" crossorigin href="./assets/air-species-state-BYAcMbc0.js">
+  <link rel="modulepreload" crossorigin href="./assets/air-species-state-CovwLG3_.js">
   <link rel="stylesheet" crossorigin href="./assets/airRemote-5rtRbN5X.css">
-  <link rel="stylesheet" crossorigin href="./assets/controller-NFgt8Djv.css">
+  <link rel="stylesheet" crossorigin href="./assets/hardware-console-UjQePVA6.css">
+  <link rel="stylesheet" crossorigin href="./assets/controller-C0ZcyQpp.css">
 </head>
 <body class="air-remote-page">
  <main class="console-shell">
-  <header class="console-header"><div><p>FUTURE PLAN / AIR UNIT 01</p><h1>AIR SPECIES</h1></div><div class="connection"><span id="air-connection-dot"></span><div><small>FOUR LIVING VIEWS</small><strong id="air-connection-label">等待生命画面</strong></div></div></header>
+  <header class="console-header"><div><p>FUTURE PLAN / AIR UNIT 01</p><h1>AIR SPECIES</h1></div><div class="connection"><span id="air-connection-dot"></span><div><small>FOUR LIVING VIEWS</small><strong id="air-connection-label">Waiting for living views</strong></div></div></header>
   <div class="console-grid">
    <section class="panel channel-panel"><div class="section-title"><span>01</span><h2>DISPLAY SELECT</h2><small>4 CHANNEL</small></div><div id="air-view-grid" class="screen-grid">
     <button class="screen-key active" data-air-view="screen.upper_left" aria-pressed="true">01<small>FLIGHT</small></button>
@@ -23,16 +24,16 @@
     <button class="screen-key active" data-air-view="screen.left.03" aria-pressed="true">04<small>TRACE</small></button>
    </div><div class="readout"><div><small>LIVE CHANNELS</small><strong id="air-channel-label">4 / 4 PLAYING</strong></div><span id="air-channel-count">04</span></div><div class="content-buttons"><button id="air-all" class="key light">ALL ON</button><button id="air-none" class="key">ALL OFF</button><button id="air-reset" class="key orange">RESET</button></div></section>
    <section class="panel motion-panel"><div class="section-title"><span>02</span><h2>FLIGHT / MORPH</h2><small>DUAL TOUCH FIELD</small></div><div class="air-dual-pads">
-    <div class="air-pad-unit"><div class="air-control-pad" data-air-pad="flight" role="group" tabindex="0" aria-label="飞行触控板"><div class="air-pad-grid"></div><span class="air-pad-target"></span><span class="air-pad-position"></span><small>DRAG TO FLY</small></div><label>FLIGHT FIELD</label></div>
-    <div class="air-pad-unit"><div class="air-control-pad" data-air-pad="field" role="group" tabindex="0" aria-label="形态触控板"><div class="air-pad-grid"></div><span class="air-pad-target"></span><span class="air-pad-position"></span><span class="air-field-influence"></span><small>DRAG TO MORPH</small></div><label>MORPH FIELD</label></div>
-   </div><div class="air-coordinate-row"><span>X <output id="air-x">+0.00</output></span><span>Y <output id="air-y">+0.00</output></span><span id="air-behaviour">自主漂浮</span></div><div class="air-field-row"><span id="air-field-status">等待触碰</span><span>吸附 <output id="air-field-strength">0%</output></span></div><div class="view-keys"><a class="key light" href="./air.html">VIEWS</a><span class="air-mode-readout" id="air-mode">LIVE SIMULATION</span></div></section>
+    <div class="air-pad-unit"><div class="air-control-pad" data-air-pad="flight" role="group" tabindex="0" aria-label="Flight touchpad"><div class="air-pad-grid"></div><span class="air-pad-target"></span><span class="air-pad-position"></span><small>DRAG TO FLY</small></div><label>FLIGHT FIELD</label></div>
+    <div class="air-pad-unit"><div class="air-control-pad" data-air-pad="field" role="group" tabindex="0" aria-label="Morph touchpad"><div class="air-pad-grid"></div><span class="air-pad-target"></span><span class="air-pad-position"></span><span class="air-field-influence"></span><small>DRAG TO MORPH</small></div><label>MORPH FIELD</label></div>
+   </div><div class="air-coordinate-row"><span>X <output id="air-x">+0.00</output></span><span>Y <output id="air-y">+0.00</output></span><span id="air-behaviour">Floating</span></div><div class="air-field-row"><span id="air-field-status">Waiting for touch</span><span>Attraction <output id="air-field-strength">0%</output></span></div><div class="view-keys"><a class="key light" href="./controller.html">MAIN CONSOLE</a><a class="key light" href="./air.html">VIEWS</a><span class="air-mode-readout" id="air-mode">LIVE SIMULATION</span></div></section>
    <section class="panel knobs-panel"><div class="section-title"><span>03</span><h2>SIGNAL / DYNAMICS</h2><small>ROTARY OR NUMERIC INPUT</small></div><div class="knob-bank air-knob-bank">
-    <div class="knob-unit"><div class="knob" data-air-knob="response" role="slider" tabindex="0" aria-label="Motion Response"><div class="knob-cap"><i class="knob-indicator"></i></div></div><input id="response-value" class="knob-number" type="number" min="0" max="100" step="1" value="45" aria-label="飞行响应百分比"/><label>RESPONSE</label></div>
-    <div class="knob-unit"><div class="knob" data-air-knob="feather" role="slider" tabindex="0" aria-label="Feather Dynamics"><div class="knob-cap"><i class="knob-indicator"></i></div></div><input id="feather-value" class="knob-number" type="number" min="0" max="100" step="1" value="65" aria-label="羽毛动态百分比"/><label>FEATHER</label></div>
-    <div class="knob-unit"><div class="knob" data-air-knob="drift" role="slider" tabindex="0" aria-label="Drift"><div class="knob-cap"><i class="knob-indicator"></i></div></div><input id="drift-value" class="knob-number" type="number" min="0" max="100" step="1" value="50" aria-label="自主漂移百分比"/><label>DRIFT</label></div>
-    <div class="knob-unit"><div class="knob" data-air-knob="attraction" role="slider" tabindex="0" aria-label="Attraction"><div class="knob-cap"><i class="knob-indicator"></i></div></div><input id="attraction-value" class="knob-number" type="number" min="0" max="100" step="1" value="72" aria-label="吸附强度百分比"/><label>ATTRACT</label></div>
-    <div class="knob-unit"><div class="knob" data-air-knob="fluidity" role="slider" tabindex="0" aria-label="Fluidity"><div class="knob-cap"><i class="knob-indicator"></i></div></div><input id="fluidity-value" class="knob-number" type="number" min="0" max="100" step="1" value="65" aria-label="流动性百分比"/><label>FLUIDITY</label></div>
-   </div><div class="signal-row"><span>拖动旋钮或点击数字直接输入</span><span id="air-remote-status">四路共享同一生命状态</span></div></section>
+    <div class="knob-unit"><div class="knob" data-air-knob="response" role="slider" tabindex="0" aria-label="Motion Response"><div class="knob-cap"><i class="knob-indicator"></i></div></div><input id="response-value" class="knob-number" type="number" min="0" max="100" step="1" value="45" aria-label="Flight response percent"/><label>RESPONSE</label></div>
+    <div class="knob-unit"><div class="knob" data-air-knob="feather" role="slider" tabindex="0" aria-label="Feather Dynamics"><div class="knob-cap"><i class="knob-indicator"></i></div></div><input id="feather-value" class="knob-number" type="number" min="0" max="100" step="1" value="65" aria-label="Fibre dynamics percent"/><label>FEATHER</label></div>
+    <div class="knob-unit"><div class="knob" data-air-knob="drift" role="slider" tabindex="0" aria-label="Drift"><div class="knob-cap"><i class="knob-indicator"></i></div></div><input id="drift-value" class="knob-number" type="number" min="0" max="100" step="1" value="50" aria-label="Drift percent"/><label>DRIFT</label></div>
+    <div class="knob-unit"><div class="knob" data-air-knob="attraction" role="slider" tabindex="0" aria-label="Attraction"><div class="knob-cap"><i class="knob-indicator"></i></div></div><input id="attraction-value" class="knob-number" type="number" min="0" max="100" step="1" value="72" aria-label="Attraction percent"/><label>ATTRACT</label></div>
+    <div class="knob-unit"><div class="knob" data-air-knob="fluidity" role="slider" tabindex="0" aria-label="Fluidity"><div class="knob-cap"><i class="knob-indicator"></i></div></div><input id="fluidity-value" class="knob-number" type="number" min="0" max="100" step="1" value="65" aria-label="Fluidity percent"/><label>FLUIDITY</label></div>
+   </div><div class="signal-row"><span>Drag a dial or enter a number</span><span id="air-remote-status">Four channels share one living state</span></div></section>
   </div>
   <footer><span>FS–AIR01 / LOW VOLTAGE DIGITAL CONTROL</span><span>NO 3D SCENE / REMOTE ONLY</span></footer>
  </main>

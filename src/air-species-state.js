@@ -7,7 +7,7 @@ const smooth=value=>value*value*(3-2*value);
 const approach=(value,target,rate,dt)=>value+(target-value)*(1-Math.exp(-rate*dt));
 function finite(value,name){if(typeof value!=='number'||!Number.isFinite(value))throw new TypeError(name+' must be a finite number.');return value;}
 function initialState(){
- return {time:0,x:0,y:0,z:0,vx:0,vy:0,vz:0,speed:0,phase:0,flap:0,bank:0,featherLag:0,stretch:1,
+ return {viewTransforms:Object.fromEntries(AIR_SCREEN_IDS.map(id=>[id,{yaw:0,pitch:0,zoom:1}])),time:0,x:0,y:0,z:0,vx:0,vy:0,vz:0,speed:0,phase:0,flap:0,bank:0,featherLag:0,stretch:1,
   wind:{x:0,y:0},target:{x:0,y:0},input:{x:0,y:0,active:false,source:'pointer'},
   field:{x:0,y:0,vx:0,vy:0,target:{x:0,y:0},input:{x:0,y:0,active:false,source:'pointer'},strength:0,energy:0,swirl:0,phase:0,mode:'resting'},
   params:{...AIR_DEFAULTS},mode:'floating',trail:[{x:0,y:0,z:0,time:0}]};
@@ -121,6 +121,9 @@ export function createAirSpeciesState(){
  function reset(){
   Object.assign(state,initialState());accumulator=0;trailElapsed=0;releaseTime=-GLIDE_SECONDS;coast={x:0,y:0};return state;
  }
- function snapshot(){return {...state,wind:{...state.wind},target:{...state.target},input:{...state.input},field:{...state.field,target:{...state.field.target},input:{...state.field.input}},params:{...state.params},trail:state.trail.map(point=>({...point}))};}
- return {state,step,setInput,releaseInput,setFieldInput,releaseFieldInput,setParameters,reset,snapshot};
+ function orbitView(id,dx,dy){if(!AIR_SCREEN_IDS.includes(id))throw new TypeError('Unknown AIR view');finite(dx,'yaw');finite(dy,'pitch');const v=state.viewTransforms[id];v.yaw=Math.atan2(Math.sin(v.yaw+clamp(dx,-.5,.5)),Math.cos(v.yaw+clamp(dx,-.5,.5)));v.pitch=clamp(v.pitch+dy,-1,1);}
+ function zoomView(id,factor){if(!AIR_SCREEN_IDS.includes(id))throw new TypeError('Unknown AIR view');finite(factor,'zoom');if(factor<=0)throw new RangeError('Zoom must be positive');state.viewTransforms[id].zoom=clamp(state.viewTransforms[id].zoom*factor,.55,2.2);}
+ function resetView(id){if(!AIR_SCREEN_IDS.includes(id))throw new TypeError('Unknown AIR view');Object.assign(state.viewTransforms[id],{yaw:0,pitch:0,zoom:1});}
+ function snapshot(){return {...state,viewTransforms:Object.fromEntries(Object.entries(state.viewTransforms).map(([id,v])=>[id,{...v}])),wind:{...state.wind},target:{...state.target},input:{...state.input},field:{...state.field,target:{...state.field.target},input:{...state.field.input}},params:{...state.params},trail:state.trail.map(point=>({...point}))};}
+ return {state,step,orbitView,zoomView,resetView,setInput,releaseInput,setFieldInput,releaseFieldInput,setParameters,reset,snapshot};
 }

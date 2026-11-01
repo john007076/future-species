@@ -8,8 +8,8 @@ function waitForMedia(element, events, ready, start, label) {
       element.removeEventListener('error', failed);
     };
     const loaded = () => { if (ready()) { cleanup(); resolve(); } };
-    const failed = () => { cleanup(); reject(new Error(`无法解码此${label}，请换用浏览器支持的格式。`)); };
-    const timer = setTimeout(() => { cleanup(); reject(new Error(`${label}读取超过 20 秒，请重试或换用较小的文件。`)); }, 20000);
+    const failed = () => { cleanup(); reject(new Error(`Cannot decode this${label}. Choose a browser-supported format.`)); };
+    const timer = setTimeout(() => { cleanup(); reject(new Error(`${label}Loading exceeded 20 seconds. Retry or choose a smaller file.`)); }, 20000);
     events.forEach(event => element.addEventListener(event, loaded));
     element.addEventListener('error', failed);
     try { start(); loaded(); } catch (error) { cleanup(); reject(error); }
@@ -17,11 +17,11 @@ function waitForMedia(element, events, ready, start, label) {
 }
 
 export async function createLocalMedia(file) {
-  if (!(file instanceof File) || file.size === 0) throw new TypeError('请选择非空的本地图片或视频文件。');
+  if (!(file instanceof File) || file.size === 0) throw new TypeError('Choose a non-empty local image or video.');
   const mime = file.type.toLowerCase(), name = file.name.toLowerCase();
   const isVideo = mime.startsWith('video/') || /\.(mp4|webm|mov|m4v|ogv|ogg)$/.test(name);
   const isImage = mime.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp|avif|svg|ico|heic|heif)$/.test(name);
-  if (!isVideo && !isImage) throw new TypeError('此文件不是支持的图片或视频类型。');
+  if (!isVideo && !isImage) throw new TypeError('Unsupported image or video type.');
   const url = URL.createObjectURL(file);
   let texture, video, image, disposed = false;
   const dispose = () => {
@@ -44,14 +44,14 @@ export async function createLocalMedia(file) {
         video.src = url;
         video.load();
         video.play().catch(() => {}); // A blocked autoplay still permits displaying the decoded first frame.
-      }, '视频');
+      }, 'video');
       texture = new THREE.VideoTexture(video);
       width = video.videoWidth;
       height = video.videoHeight;
     } else {
       image = new Image();
       image.decoding = 'async';
-      await waitForMedia(image, ['load'], () => image.complete && image.naturalWidth > 0, () => { image.src = url; }, '图片');
+      await waitForMedia(image, ['load'], () => image.complete && image.naturalWidth > 0, () => { image.src = url; }, 'image');
       texture = new THREE.Texture(image);
       width = image.naturalWidth;
       height = image.naturalHeight;

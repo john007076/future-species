@@ -3,7 +3,7 @@ import {mesh,rod,roundedRect} from './model-utils.js';
 import {createConsoleController} from './console-controller.js';
 
 export function createTable(mats){
- const root=new THREE.Group();root.name='table';root.userData={id:'table',kind:'table',label:'透明操作台'};
+ const root=new THREE.Group();root.name='table';root.userData={id:'table',kind:'table',label:'Transparent control desk'};
  const y=2.39;
  const outline=new THREE.Shape();
  outline.moveTo(-2.05,2.35);outline.bezierCurveTo(-2.20,.7,-2.05,-1.13,0,-1.38);outline.bezierCurveTo(2.05,-1.13,2.20,.7,2.05,2.35);outline.lineTo(1.72,2.32);outline.bezierCurveTo(1.82,.72,1.72,-.18,0,-.22);outline.bezierCurveTo(-1.72,-.18,-1.82,.72,-1.72,2.32);outline.closePath();

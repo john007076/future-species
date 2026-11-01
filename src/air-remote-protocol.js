@@ -5,6 +5,9 @@ export function airTelemetry(state,channels){
 export function applyAirRemoteControl({flight,message,onReset,onTelemetry,onViewState}){
  if(!message?.type)return false;
  if(message.type==='airStateRequest'){onTelemetry?.();return true;}
+ if(message.type==='airViewOrbit'){flight.orbitView(message.id,message.dx,message.dy);return true;}
+ if(message.type==='airViewZoom'){flight.zoomView(message.id,message.factor);return true;}
+ if(message.type==='airViewReset'){flight.resetView(message.id);return true;}
  if(message.type==='airInput'){flight.setInput(message.input);return true;}
  if(message.type==='airRelease'){flight.releaseInput();return true;}
  if(message.type==='airFieldInput'){flight.setFieldInput(message.input);return true;}

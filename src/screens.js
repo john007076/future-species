@@ -41,7 +41,7 @@ function displayMaterial(texture,spec){
 
 function badge(parent,text,w,h,y,material){
  const canvas=document.createElement('canvas');canvas.width=256;canvas.height=48;
- const context=canvas.getContext('2d');context.fillStyle='#b7b098';context.fillRect(0,0,256,48);context.fillStyle='#354446';context.font='18px monospace';context.fillText(text,12,30);
+ const context=canvas.getContext('2d');context.fillStyle='#b7b098';context.fillRect(0,0,256,48);context.fillStyle='#354446';context.font='18px "FS Pixel"';context.fillText(text,12,30);
  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
  const mat=new THREE.MeshStandardMaterial({map:texture,roughness:.7});
  const plate=mesh(new THREE.PlaneGeometry(Math.min(w*.24,.48),Math.min(h*.035,.07)),mat,parent,'manufacturer.badge',[-w*.31,y,.112]);plate.castShadow=false;

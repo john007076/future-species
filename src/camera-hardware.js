@@ -9,7 +9,7 @@ function rippleMaterial(source){
 }
 
 export function createCameraHardware(mats){
- const root=new THREE.Group();root.name='camera.upper_center';root.userData={id:'camera.upper_center',kind:'camera',label:'顶部 · 双镜头摄像头'};
+ const root=new THREE.Group();root.name='camera.upper_center';root.userData={id:'camera.upper_center',kind:'camera',label:'TOP / STEREO CAMERA'};
  const bodyMaterial=rippleMaterial(mats.cream);
  box(root,'camera.leftModule',[.43,.25,.27],[-.225,0,0],bodyMaterial,.035);
  box(root,'camera.rightModule',[.43,.25,.27],[.225,0,0],bodyMaterial,.035);

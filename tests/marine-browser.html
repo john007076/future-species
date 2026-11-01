@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MARINE SPECIES · Local render check</title>
+<style>
+  body{margin:28px;background:#10272f;color:#d9e5dd;font:12px/1.7 monospace}h1{font:22px/1.4 Arial,sans-serif;letter-spacing:.12em}h2{font-size:14px;font-weight:400;letter-spacing:.08em;margin-top:26px}p{max-width:1000px;color:#abc1bd}pre{max-height:190px;overflow:auto;white-space:pre-wrap;padding:18px;background:#19363e;border:1px solid #7ba2a442;border-radius:4px}body[data-passed=false] pre{color:#ffc2ba}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.channels{grid-template-columns:repeat(4,minmax(0,1fr))}figure{margin:0}img{display:block;width:100%;background:#07161c;border:1px solid #7ba2a442}figcaption{margin-top:7px;color:#b1ccca}@media(max-width:700px){body{margin:16px}.grid,.channels{grid-template-columns:1fr 1fr}}
+</style>
+<h1>MARINE SPECIES / SP–02</h1>
+<p>Real WebGL render check. The images use the same four textures and lifecycle as the installation. This page never requests a microphone. Physical devices and acoustics require separate testing.</p>
+<pre id="result" role="status">Rendering and checking…</pre>
+<h2>SOUND LIFE / QUIET AND SOUND AT THE SAME TIME</h2><div class="grid" id="resonator"></div>
+<h2>NINE ENCOUNTERS / NINE REAL SPECIMEN RENDERS</h2><div class="grid" id="species"></div>
+<h2>LONG RUN MACRO / LONG-RUN TISSUE FRAMING</h2><div class="grid" id="macro"></div>
+<h2>FOUR CHANNELS / FOUR CHANNELS AT THE SAME TIME</h2><div class="grid channels" id="channels"></div>
+<h2>CONTINUOUS ENVIRONMENT / ORBIT CHECK</h2><div class="grid" id="environment"></div>
+<h2>VOLUMETRIC WAKE / VOLUMETRIC ESCAPE WAKE</h2><div class="grid" id="wake"></div>
+<link rel="stylesheet" href="/src/pixel-font.css"><script type="module">
+await document.fonts.load('12px "FS Pixel"');
+import * as THREE from 'three';
+import {createMarineViews} from '../src/species/marine/views.js';
+import {createMarineState,MARINE_SCREEN_IDS,SPECIES} from '../src/species/marine/state.js';
+import {AIR_SCREEN_IDS} from '../src/air-species-state.js';
+import {screens} from '../src/config.js';
+const result=document.querySelector('#result'),checks=[];
+const names=Object.fromEntries(Object.entries(SPECIES).map(([id,entry])=>[id,entry.name]));
+function check(name,condition){checks.push(`${condition?'PASS':'FAIL'}  ${name}`);result.textContent=checks.join('\n');if(!condition)throw Error(name);}
+function checksum(pixels){let hash=2166136261;for(let i=0;i<pixels.length;i+=7)hash=Math.imul(hash^pixels[i],16777619);return hash>>>0;}
+function figure(parent,url,label){const item=document.createElement('figure'),image=document.createElement('img'),caption=document.createElement('figcaption');image.src=url;image.alt=label;caption.textContent=label;item.append(image,caption);document.querySelector(parent).append(item);}
+let renderer,views,plane,quad,sentinel;
+try{
+  renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(1);renderer.setSize(800,600);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  views=createMarineViews({renderer});
+  check('Twelve real displays; MARINE ownership excludes AIR, camera and reserved displays',screens.length===12&&MARINE_SCREEN_IDS.length===4&&MARINE_SCREEN_IDS.every(id=>screens.some(screen=>screen.id===id)&&!AIR_SCREEN_IDS.includes(id)&&!['screen.desk','screen.upper_center','screen.center_main','screen.left.01'].includes(id)));
+  check('Four assigned textures are independent objects',JSON.stringify([...views.textures.keys()])===JSON.stringify(MARINE_SCREEN_IDS)&&new Set(views.textures.values()).size===4);
+  check('Encounter and tissue use real render targets',views.textures.get('screen.upper_right').isRenderTargetTexture&&views.textures.get('screen.right.02').isRenderTargetTexture);
+  check('Sound organism uses WebGL; index retains CanvasTexture',views.textures.get('screen.right.01').isRenderTargetTexture&&views.textures.get('screen.right.03').isCanvasTexture);
+  const presentation=new THREE.Scene(),camera=new THREE.OrthographicCamera(-1,1,1,-1,0,2);camera.position.z=1;
+  quad=new THREE.MeshBasicMaterial({toneMapped:false});plane=new THREE.Mesh(new THREE.PlaneGeometry(2,2),quad);presentation.add(plane);
+  function capture(texture){
+    renderer.setRenderTarget(null);renderer.setScissorTest(false);renderer.setSize(texture.image.width,texture.image.height);quad.map=texture;quad.needsUpdate=true;renderer.render(presentation,camera);
+    const gl=renderer.getContext(),pixels=new Uint8Array(renderer.domElement.width*renderer.domElement.height*4);gl.readPixels(0,0,renderer.domElement.width,renderer.domElement.height,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
+    let low=255,high=0;
+    for(let y=Math.floor(renderer.domElement.height*.35);y<renderer.domElement.height*.65;y++)for(let x=Math.floor(renderer.domElement.width*.35);x<renderer.domElement.width*.65;x++){const i=(y*renderer.domElement.width+x)*4,luma=(pixels[i]+pixels[i+1]+pixels[i+2])/3;low=Math.min(low,luma);high=Math.max(high,luma);}
+    return {url:renderer.domElement.toDataURL('image/png'),hash:checksum(pixels),pixels,centerContrast:high-low};
+  }
+  check('Index contains nine real model images at 1200x1140',views.diagnostics().archiveSpecimens.length===9&&views.textures.get('screen.right.03').image.width===1200&&views.textures.get('screen.right.03').image.height===1140);
+  const life=createMarineState();
+  sentinel=new THREE.WebGLRenderTarget(96,96);renderer.setRenderTarget(sentinel);renderer.setViewport(3,5,80,70);renderer.setScissor(7,9,60,40);renderer.setScissorTest(true);renderer.setClearColor(0x113355,.43);renderer.autoClear=false;
+  const before={viewport:renderer.getViewport(new THREE.Vector4()).toArray(),scissor:renderer.getScissor(new THREE.Vector4()).toArray(),color:renderer.getClearColor(new THREE.Color()).getHex(),alpha:renderer.getClearAlpha(),tone:renderer.toneMapping,space:renderer.outputColorSpace};
+  views.render(life.state);
+  check('MARINE restores the installation renderer state',renderer.getRenderTarget()===sentinel&&JSON.stringify(renderer.getViewport(new THREE.Vector4()).toArray())===JSON.stringify(before.viewport)&&JSON.stringify(renderer.getScissor(new THREE.Vector4()).toArray())===JSON.stringify(before.scissor)&&renderer.getScissorTest()&&renderer.getClearColor(new THREE.Color()).getHex()===before.color&&renderer.getClearAlpha()===before.alpha&&renderer.autoClear===false&&renderer.toneMapping===before.tone&&renderer.outputColorSpace===before.space);
+  renderer.setRenderTarget(null);renderer.setScissorTest(false);renderer.autoClear=true;renderer.setClearColor(0x000000,1);
+  views.render({...life.state,phase:'LISTENING',time:1,envelope:0});const quiet=capture(views.textures.get('screen.right.01'));views.render({...life.state,phase:'LISTENING',time:1,envelope:.12});const loud=capture(views.textures.get('screen.right.01'));check('Volume changes actual crystal pixels at identical time',quiet.hash!==loud.hash&&views.diagnostics().resonator.energy>.7);figure('#resonator',quiet.url,'Quiet / energy 0');figure('#resonator',loud.url,'Sound input / energy 0.8');
+  const fixed={...life.snapshot(),phase:'ENCOUNTER',time:1};
+  for(let i=0;i<3;i++)views.render(fixed);const frontCaptures=MARINE_SCREEN_IDS.map(id=>capture(views.textures.get(id))),front=frontCaptures.map(c=>c.hash);
+  fixed.viewStates['screen.upper_right']={yaw:.4,pitch:.2,zoom:1.4};for(let i=0;i<3;i++)views.render(fixed);
+  const orbitedCaptures=MARINE_SCREEN_IDS.map(id=>capture(views.textures.get(id))),orbited=orbitedCaptures.map(c=>c.hash);
+  figure('#macro',frontCaptures[2].url,'Before encounter orbit');figure('#macro',capture(views.textures.get('screen.right.02')).url,'After encounter orbit');
+  const macroAfter=capture(views.textures.get('screen.right.02'));let macroDelta=0;for(let i=0;i<macroAfter.pixels.length;i++)macroDelta+=Math.abs(macroAfter.pixels[i]-frontCaptures[2].pixels[i]);macroDelta/=macroAfter.pixels.length;
+  checks.push('INFO Macro mean delta '+macroDelta);
+  checks.push('INFO Independent channel hashes '+front.join('/')+' => '+orbited.join('/'));
+  check('Encounter orbits its space while resonance, tissue and index remain unchanged',front[0]!==orbited[0]&&front[1]===orbited[1]&&front[3]===orbited[3]&&macroDelta<.25);
+  fixed.viewStates['screen.right.02']={yaw:.3,pitch:-.2,zoom:1};views.render(fixed);
+  const mainAfter=capture(views.textures.get('screen.upper_right'));let mainDelta=0;for(let i=0;i<mainAfter.pixels.length;i++)mainDelta+=Math.abs(mainAfter.pixels[i]-orbitedCaptures[0].pixels[i]);mainDelta/=mainAfter.pixels.length;checks.push('INFO Encounter mean delta '+mainDelta);
+  check('Tissue rotates independently without changing resonance or encounter',capture(views.textures.get('screen.right.02')).hash!==orbited[2]&&mainDelta<.25&&capture(views.textures.get('screen.right.01')).hash===orbited[1]);
+  check('Deep population retains all species and 27 full anatomical residents',views.diagnostics().population===27&&views.diagnostics().roamingSpecies.length===9);
+  for(const yaw of [-Math.PI/2,Math.PI/2,Math.PI]){const orbitState=life.snapshot();orbitState.time=3;orbitState.viewStates['screen.upper_right']={yaw,pitch:.25,zoom:1};views.render(orbitState);figure('#environment',capture(views.textures.get('screen.upper_right')).url,`Continuous water / yaw ${yaw.toFixed(2)}`);}
+  const initial=MARINE_SCREEN_IDS.map(id=>capture(views.textures.get(id)).hash);
+  const seen=new Set(),phases=new Set(),encounters=new Map(),speciesHashes=new Set();
+  for(const id of Object.keys(SPECIES)){
+    if(!life.call(id))throw Error(`Cannot call ${id} from ${life.state.phase}`);
+    for(let frame=0;frame<600;frame++){
+      life.step(1/30,0);phases.add(life.state.phase);
+      if(life.state.phase==='ENCOUNTER'&&!seen.has(id)){
+        seen.add(id);const snapshot=life.snapshot();encounters.set(id,snapshot);views.render(snapshot);
+        const mainCapture=capture(views.textures.get('screen.upper_right'));speciesHashes.add(mainCapture.hash);
+        figure('#species',mainCapture.url,`${names[id]} / ${id} / encounter`);
+        figure('#species',capture(views.textures.get('screen.right.02')).url,`${names[id]} / ${id} / tissue`);
+      }
+      if(life.state.phase==='LISTENING')break;
+    }
+  }
+  check('Lifecycle covers nine distinct rendered specimens',seen.size===9&&speciesHashes.size===9&&views.diagnostics().species.length===9);
+  check('Lifecycle covers detection, approach, encounter, echo, escape, cooldown and listening',['SIGNAL_DETECTED','APPROACH','ENCOUNTER','ECHO','ESCAPE','COOLDOWN','LISTENING'].every(phase=>phases.has(phase)));
+  for(const time of [0,175,350]){views.render({...encounters.get('whale'),time});const macro=capture(views.textures.get('screen.right.02'));check(`Whale macro at ${time}s retains central tissue detail`,macro.centerContrast>16);figure('#macro',macro.url,`whale / tissue / ${time}s`);}
+  const encounterSnapshot=encounters.get('algae'),wakeSnapshot=encounters.get('shark');
+  views.render(encounterSnapshot);
+  const channelCaptures=MARINE_SCREEN_IDS.map(id=>capture(views.textures.get(id)));
+  const uniqueChannels=new Set(channelCaptures.map(c=>c.hash)).size===4,changedChannels=channelCaptures.map((c,i)=>c.hash!==initial[i]);
+  checks.push(`INFO  Channel hashes ${channelCaptures.map(c=>c.hash).join(' / ')}; changes from initial ${changedChannels.join(' / ')}`);
+  check('Four distinct channels respond to the same life state',uniqueChannels&&changedChannels.every(Boolean));
+  MARINE_SCREEN_IDS.forEach((id,i)=>figure('#channels',channelCaptures[i].url,id));
+  for(const [age,phase] of [[.25,'ESCAPE'],[.7,'ESCAPE'],[1.7,'COOLDOWN']]){views.render({...wakeSnapshot,phase,time:wakeSnapshot.time+age,phaseTime:age,progress:Math.min(1,age/.9)});figure('#wake',capture(views.textures.get('screen.upper_right')).url,`shark / ${phase} / ${age}s`);}
+  check('WebGL has no errors',renderer.getContext().getError()===renderer.getContext().NO_ERROR);
+  const diagnostics=views.diagnostics();
+  result.textContent=checks.join('\n')+'\n\n'+JSON.stringify(diagnostics,null,2)+'\n\nThis render check does not use microphone mocks and does not test physical microphones or acoustic feedback.';
+  document.body.dataset.passed='true';
+}catch(error){document.body.dataset.passed='false';result.textContent=checks.join('\n')+'\nFAIL  '+error.message;console.error(error);}
+finally{views?.dispose();sentinel?.dispose();plane?.geometry.dispose();quad?.dispose();renderer?.dispose();}
+</script>
+</html>

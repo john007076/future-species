@@ -43,5 +43,5 @@ function middleware(server){
 export default defineConfig({
  base:'./',plugins:[{name:'future-species-live-control',configureServer:middleware,configurePreviewServer(server){middleware(server);previewRelay(server);}}],
  server:{host:'0.0.0.0',port:5173,strictPort:true},preview:{host:'0.0.0.0',port:4173,strictPort:true},
- build:{rolldownOptions:{input:{main:resolve('index.html'),controller:resolve('controller.html'),air:resolve('air.html'),airRemote:resolve('air-remote.html')}}},
+ build:{rolldownOptions:{input:{main:resolve('index.html'),controller:resolve('controller.html'),air:resolve('air.html'),airRemote:resolve('air-remote.html'),marine:resolve('marine.html'),marineRemote:resolve('marine-remote.html')}}},
 });

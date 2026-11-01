@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
  <meta charset="UTF-8"/>
  <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -11,51 +11,51 @@
  </style>
 </head>
 <body class="is-booting">
- <canvas id="scene" aria-label="FUTURE SPECIES 三维交互装置，可拖动旋转、滚轮缩放、点击选择屏幕"></canvas>
+ <canvas id="scene" aria-label="FUTURE SPECIES Interactive 3D installation: drag to orbit, scroll to zoom, click a screen to select it"></canvas>
  <div id="loading" class="boot-screen" role="status">
   <div class="boot-console">
    <div class="boot-head"><div class="boot-brand"><small>FUTURE PLAN / REMOTE UNIT 01</small><strong>FUTURE SPECIES</strong></div><span class="boot-status"><i></i> SYSTEM BOOT</span></div>
    <div class="boot-workspace">
-    <div class="boot-display"><span class="boot-eyebrow">ASSEMBLING INSTALLATION</span><strong id="loading-title">正在装配场景</strong><small id="loading-detail">准备 WebGL 与材质…</small><div class="boot-track" id="loading-meter" role="progressbar" aria-label="场景加载进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="loading-progress"></i></div><div class="boot-meta"><span>12 DISPLAYS / LINKED HARDWARE</span><span id="loading-percent">00%</span></div></div>
+    <div class="boot-display"><span class="boot-eyebrow">ASSEMBLING INSTALLATION</span><strong id="loading-title">Assembling the installation</strong><small id="loading-detail">Preparing WebGL and materials...</small><div class="boot-track" id="loading-meter" role="progressbar" aria-label="Scene loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="loading-progress"></i></div><div class="boot-meta"><span>12 DISPLAYS / LINKED HARDWARE</span><span id="loading-percent">00%</span></div></div>
     <div class="boot-hardware"><div class="boot-keys"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="boot-joystick"><i></i></div><div class="boot-knobs"><i></i><i></i><i></i></div></div>
    </div>
    <div class="boot-footer"><span>FS–RC01 / CONTROL SURFACE</span><span>PLEASE WAIT</span></div>
   </div>
  </div>
  <header id="identity"><strong>FUTURE SPECIES</strong><span>FUTURE PLAN / 12 CHANNEL INSTALLATION</span></header>
- <nav id="controls" aria-label="场景视角">
-  <button data-view="reference" aria-pressed="true">参考构图</button><button data-view="front" aria-pressed="false">正视</button><button data-view="left" aria-pressed="false">左视</button><button data-view="right" aria-pressed="false">右视</button><button data-view="back" aria-pressed="false">背视</button><button data-view="top" aria-pressed="false">俯视</button><button data-view="seat" aria-pressed="false">座椅视角</button><span class="divider"></span><button id="hide-ui" title="按 H 恢复界面">隐藏界面</button>
+ <nav id="controls" aria-label="Camera views">
+  <button data-view="reference" aria-pressed="true">REFERENCE</button><button data-view="front" aria-pressed="false">FRONT</button><button data-view="left" aria-pressed="false">LEFT</button><button data-view="right" aria-pressed="false">RIGHT</button><button data-view="back" aria-pressed="false">REAR</button><button data-view="top" aria-pressed="false">TOP</button><button data-view="seat" aria-pressed="false">SEAT</button><span class="divider"></span><button id="hide-ui" title="Press H to restore the interface">HIDE UI</button>
  </nav>
- <div id="utility-controls"><button id="camera-toggle">打开摄像头</button><button id="flip-camera">反转画面</button><a href="./controller.html" target="_blank" rel="noopener">移动触控台</a></div>
+ <div id="utility-controls"><button id="camera-toggle">START CAMERA</button><button id="flip-camera">FLIP CAMERA</button><a href="./controller.html" target="_blank" rel="noopener">REMOTE CONSOLE</a></div>
  <div id="toast" role="status" hidden></div>
- <aside id="selection" aria-label="硬件编辑" hidden>
-  <div class="panel-heading"><div><small>SELECTED HARDWARE</small><strong id="selection-name"></strong></div><button id="clear-selection" aria-label="关闭选择">×</button></div>
-  <fieldset class="hardware-only"><legend>角度 <span>滑块 / 度数</span></legend>
-   <label class="angle-control">X <input type="range" min="-180" max="180" step="1" data-rotation-slider="0" aria-label="X 角度滑块"/><input type="number" min="-360" max="360" step="1" data-rotation="0" aria-label="X 角度输入"/></label>
-   <label class="angle-control">Y <input type="range" min="-180" max="180" step="1" data-rotation-slider="1" aria-label="Y 角度滑块"/><input type="number" min="-360" max="360" step="1" data-rotation="1" aria-label="Y 角度输入"/></label>
-   <label class="angle-control">Z <input type="range" min="-180" max="180" step="1" data-rotation-slider="2" aria-label="Z 角度滑块"/><input type="number" min="-360" max="360" step="1" data-rotation="2" aria-label="Z 角度输入"/></label>
-   <button id="reset-hardware" class="reset-button">归位默认位置</button>
+ <aside id="selection" aria-label="Hardware editor" hidden>
+  <div class="panel-heading"><div><small>SELECTED HARDWARE</small><strong id="selection-name"></strong></div><button id="clear-selection" aria-label="Clear selection">×</button></div>
+  <fieldset class="hardware-only"><legend>Angle <span>SLIDER / DEGREES</span></legend>
+   <label class="angle-control">X <input type="range" min="-180" max="180" step="1" data-rotation-slider="0" aria-label="X Angle slider"/><input type="number" min="-360" max="360" step="1" data-rotation="0" aria-label="X Angle input"/></label>
+   <label class="angle-control">Y <input type="range" min="-180" max="180" step="1" data-rotation-slider="1" aria-label="Y Angle slider"/><input type="number" min="-360" max="360" step="1" data-rotation="1" aria-label="Y Angle input"/></label>
+   <label class="angle-control">Z <input type="range" min="-180" max="180" step="1" data-rotation-slider="2" aria-label="Z Angle slider"/><input type="number" min="-360" max="360" step="1" data-rotation="2" aria-label="Z Angle input"/></label>
+   <button id="reset-hardware" class="reset-button">RESTORE TRANSFORM</button>
   </fieldset>
-  <details class="screen-only position-advanced"><summary>高级：XYZ 位置</summary><div class="vector-grid">
-   <label>X <input type="number" step="0.01" min="-30" max="30" data-position="0" aria-label="位置 X"/></label><label>Y <input type="number" step="0.01" min="-30" max="30" data-position="1" aria-label="位置 Y"/></label><label>Z <input type="number" step="0.01" min="-30" max="30" data-position="2" aria-label="位置 Z"/></label>
+  <details class="screen-only position-advanced"><summary>ADVANCED / XYZ POSITION</summary><div class="vector-grid">
+   <label>X <input type="number" step="0.01" min="-30" max="30" data-position="0" aria-label="Position X"/></label><label>Y <input type="number" step="0.01" min="-30" max="30" data-position="1" aria-label="Position Y"/></label><label>Z <input type="number" step="0.01" min="-30" max="30" data-position="2" aria-label="Position Z"/></label>
   </div></details>
   <div class="screen-only">
-   <fieldset><legend>独立显示</legend>
-    <label class="wide">内容状态 <select id="screen-select"><option value="image">图片 / 占位内容</option><option value="video">视频</option><option value="live">Canvas / 实时纹理</option><option value="blank">空白</option></select></label>
-    <label>亮度 <input type="range" min="0" max="2" step="0.01" data-display="brightness"/></label>
-    <label>饱和度 <input type="range" min="0" max="2" step="0.01" data-display="saturation"/></label>
-    <label>对比度 <input type="range" min="0.2" max="2" step="0.01" data-display="contrast"/></label>
-    <label>扫描线 <input type="range" min="0" max="0.5" step="0.01" data-display="scanlines"/></label>
-    <label class="wide">色调 <input type="color" data-display="tint"/></label>
+   <fieldset><legend>DISPLAY SETTINGS</legend>
+    <label class="wide">SOURCE <select id="screen-select"><option value="image">SOURCE IMAGE</option><option value="video">VIDEO</option><option value="live">LIVE TEXTURE</option><option value="blank">BLANK</option></select></label>
+    <label>Brightness <input type="range" min="0" max="2" step="0.01" data-display="brightness"/></label>
+    <label>Saturation <input type="range" min="0" max="2" step="0.01" data-display="saturation"/></label>
+    <label>Contrast <input type="range" min="0.2" max="2" step="0.01" data-display="contrast"/></label>
+    <label>Scanlines <input type="range" min="0" max="0.5" step="0.01" data-display="scanlines"/></label>
+    <label class="wide">Tint <input type="color" data-display="tint"/></label>
    </fieldset>
-   <div class="button-grid"><button id="content-upload">上传图片 / 视频</button><button id="content-blank">空白</button><button id="content-demo">实时纹理</button><button id="content-restore">还原内容</button></div>
-   <details><summary>布局与项目配置</summary><div class="button-grid"><button id="save-project">保存到项目</button><button id="export-layout">导出 JSON</button><button id="import-layout">导入 JSON</button></div></details>
+   <div class="button-grid"><button id="content-upload">UPLOAD IMAGE / VIDEO</button><button id="content-blank">BLANK</button><button id="content-demo">LIVE TEXTURE</button><button id="content-restore">RESTORE SOURCE</button></div>
+   <details><summary>LAYOUT / PROJECT</summary><div class="button-grid"><button id="save-project">SAVE TO PROJECT</button><button id="export-layout">EXPORT JSON</button><button id="import-layout">IMPORT JSON</button></div></details>
    <input id="content-file" type="file" accept="image/*,video/*" hidden/><input id="layout-file" type="file" accept="application/json,.json" hidden/>
   </div>
   <p id="editor-status" role="status"></p>
  </aside>
- <p id="hint">拖动旋转 · 滚轮缩放 · 单击屏幕编辑 <span>H 隐藏 / 显示界面 · Esc 取消选择</span></p>
- <script>window.addEventListener('error',event=>{const detail=document.querySelector('#loading-detail');if(detail)detail.textContent='启动错误：'+(event.message||'模块加载失败');});window.addEventListener('unhandledrejection',event=>{const detail=document.querySelector('#loading-detail');if(detail)detail.textContent='启动错误：'+event.reason;});</script>
+ <p id="hint">Drag to orbit / scroll to zoom / click a display to edit <span>H Toggle interface / Esc clears selection</span></p>
+ <script>window.addEventListener('error',event=>{const detail=document.querySelector('#loading-detail');if(detail)detail.textContent='Startup error:'+(event.message||'Module failed to load');});window.addEventListener('unhandledrejection',event=>{const detail=document.querySelector('#loading-detail');if(detail)detail.textContent='Startup error:'+event.reason;});</script>
  <script type="module" src="/src/main.js"></script>
 </body>
 </html>

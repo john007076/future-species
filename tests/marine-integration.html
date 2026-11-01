@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MARINE integration verification</title>
+<style>body{margin:16px;background:#18323b;color:#d4e3da;font:12px/1.6 monospace}button{padding:10px}iframe{width:100%;height:700px;border:0}pre{white-space:pre-wrap}body[data-passed=false] pre{color:#ffc2ba}</style>
+<button id="run">Verify installation, encounters and mock microphone lifecycle</button>
+<pre id="result">Ready. Uses the real installation. Microphone checks use local generated MediaStreams, never physical devices.</pre>
+<iframe src="/" title="Real twelve-display installation"></iframe>
+<link rel="stylesheet" href="/src/pixel-font.css"><script type="module">
+await document.fonts.load('12px "FS Pixel"');
+const frame=document.querySelector('iframe'),out=document.querySelector('#result'),button=document.querySelector('#run');
+const wait=(test,timeout=6000)=>new Promise((resolve,reject)=>{const start=performance.now();const id=setInterval(()=>{if(test()){clearInterval(id);resolve();}else if(performance.now()-start>timeout){clearInterval(id);reject(Error('Wait timeout'));}},30);});
+function measureFrames(w,duration=3200){return new Promise(resolve=>{const intervals=[];let start=0,previous=0;function tick(now){if(!start)start=previous=now;else{intervals.push(now-previous);previous=now;}if(now-start<duration)w.requestAnimationFrame(tick);else{const sorted=[...intervals].sort((a,b)=>a-b);resolve({frames:intervals.length,seconds:(now-start)/1000,averageFps:intervals.length/((now-start)/1000),p95FrameMs:sorted[Math.floor(sorted.length*.95)]||0});}}w.requestAnimationFrame(tick);});}
+button.onclick=async()=>{
+ button.disabled=true;document.body.dataset.passed='running';const checks=[],mockContexts=[];let mediaDescriptor,remoteFrame;
+ const check=(name,yes)=>{checks.push(`${yes?'PASS':'FAIL'} ${name}`);out.textContent=checks.join('\n');if(!yes)throw Error(name);};
+ const info=text=>{checks.push(`INFO ${text}`);out.textContent=checks.join('\n');};
+ try{
+  await wait(()=>frame.contentWindow.futurePlan,30000);const w=frame.contentWindow,app=w.futurePlan;check('Installation ready',await app.ready);
+  app.marineSpecies.setRendering(false);const baselineSample=await measureFrames(w,2200);app.marineSpecies.setRendering(true);info(`MARINE rendering disabled baseline ${baselineSample.averageFps.toFixed(1)} fps`);
+  check('Twelve displays retained',app.diagnostics().screenCount===12);const gl=app.renderer.getContext(),debugRenderer=gl.getExtension('WEBGL_debug_renderer_info');info(`WebGL renderer：${app.diagnostics().renderer} / ${debugRenderer?gl.getParameter(debugRenderer.UNMASKED_RENDERER_WEBGL):'unmasked unavailable'}`);
+  check('AIR retains its four live textures',app.airSpecies.diagnostics().channels.every(c=>c.attached));
+  check('Four MARINE textures attached to real displays',app.marineSpecies.diagnostics().channels.every(c=>c.attached));
+  const reserved=['screen.upper_center','screen.center_main','screen.left.01','screen.desk'],maps=reserved.map(id=>app.screens.get(id).material.map);
+  app.select('screen.upper_right');check('Marine panel opens independently from AIR controls',!w.document.querySelector('#marine-species-panel').hidden&&w.document.querySelectorAll('#marine-species-panel [data-air-pad]').length===0);
+  const selector=w.document.querySelector('#marine-species-panel [data-visitor]'),selected=new Set();
+  for(const id of ['jelly','fish','mollusc','whale','shark','angelfish','butterflyfish','tang','algae']){
+   app.marineSpecies.stop();selector.value=id;await app.marineSpecies.simulate();selected.add(app.marineSpecies.snapshot().species);app.marineSpecies.stop();
+  }
+  check('Installation supports all nine specimens',selected.size===9);
+  app.marineSpecies.inspect('whale');check('Specimen inspection stays active without audio',app.marineSpecies.snapshot().inspecting&&app.marineSpecies.snapshot().species==='whale'&&app.marineSpecies.diagnostics().audio.activeTracks===0);app.marineSpecies.stop();
+  selector.value='jelly';const phases=new Set(),frameSample=measureFrames(w);let lockoutProbe=null;frameSample.then(sample=>info(`Frame sample ${sample.averageFps.toFixed(1)} fps / ${sample.frames} frames / hidden=${w.document.hidden}`));
+  const calling=app.marineSpecies.simulate();phases.add(app.marineSpecies.snapshot().phase);await calling;
+  await new Promise((resolve,reject)=>{const started=performance.now();const id=setInterval(()=>{
+   const s=app.marineSpecies.snapshot(),diagnostic=app.marineSpecies.diagnostics();phases.add(s.phase);out.textContent=checks.join('\n')+`\nLIVE ${s.phase} ${s.species} phaseTime=${s.phaseTime.toFixed(2)} time=${s.time.toFixed(2)} frames=${diagnostic.frames} renderMs=${diagnostic.renderMs.toFixed(1)} avgMs=${diagnostic.averageRenderMs.toFixed(1)} hidden=${w.document.hidden}`;
+   if(!lockoutProbe&&['ECHO','ESCAPE','COOLDOWN'].includes(s.phase)){const count=s.encounterCount;lockoutProbe=app.marineSpecies.simulate().then(accepted=>!accepted&&app.marineSpecies.snapshot().encounterCount===count);}
+   if(s.phase==='LISTENING'){clearInterval(id);resolve();}if(performance.now()-started>240000){clearInterval(id);reject(Error(`Lifecycle timeout at ${s.phase} ${s.phaseTime.toFixed(2)} / ${s.time.toFixed(2)}`));}
+  },40);});
+  check('Actual frame loop completes approach, encounter, echo, escape and cooldown',['SIGNAL_DETECTED','APPROACH','ENCOUNTER','ECHO','ESCAPE','COOLDOWN','LISTENING'].every(p=>phases.has(p)));
+  check('Echo, escape and cooldown lock retriggers',await lockoutProbe);
+  check('Lifecycle completes without a microphone',app.marineSpecies.diagnostics().audio.activeTracks===0);
+  const performanceSample=await frameSample;check('Main frame-rate sample is valid',performanceSample.frames>0&&Number.isFinite(performanceSample.averageFps));info(`Main frame loop ${performanceSample.averageFps.toFixed(1)} fps, p95 ${performanceSample.p95FrameMs.toFixed(1)} ms, ${performanceSample.seconds.toFixed(2)} s`);
+  await app.marineSpecies.simulate();app.select('screen.upper_left');
+  check('Switching to AIR releases marine audio and lifecycle',app.marineSpecies.snapshot().phase==='IDLE'&&app.marineSpecies.diagnostics().audio.contextState==='closed');
+  check('AIR retains both touchpads',w.document.querySelectorAll('[data-air-pad]').length===2&&!w.document.querySelector('#air-species-panel').hidden);
+  app.airSpecies.setInput({x:.4,y:.3});app.airSpecies.setFieldInput({x:-.3,y:.2});
+  check('Flight and morph inputs stay independent',app.airSpecies.snapshot().input.active&&app.airSpecies.snapshot().field.input.active);app.airSpecies.releaseInput();app.airSpecies.releaseFieldInput();
+  const hardwareId=[...app.registry.keys()].find(id=>app.registry.get(id).userData.kind==='instrument'),hardware=app.registry.get(hardwareId),position=hardware.position.toArray(),rotation=[hardware.rotation.x,hardware.rotation.y,hardware.rotation.z];
+  app.select(hardwareId);app.setScreenTransform(hardwareId,{position:[position[0]+.025,position[1],position[2]]});
+  check('Hardware editor and actual transforms retained',!w.document.querySelector('#selection').hidden&&Math.abs(hardware.position.x-position[0]-.025)<1e-6);
+  app.setScreenTransform(hardwareId,{position,rotation});
+  const cameraBefore=app.camera.position.toArray();await app.remoteControl({type:'cameraMove',dx:14,dy:-5,zoom:1});
+  check('OrbitControls camera controls retained',app.camera.position.toArray().some((value,i)=>Math.abs(value-cameraBefore[i])>1e-4));app.setView('reference',true);
+  app.select('screen.right.02');app.setScreenDisplay('screen.right.02',{mode:'blank'});await app.restoreScreenContent('screen.right.02');
+  check('Restore source reattaches MARINE textures',app.marineSpecies.diagnostics().channels.every(c=>c.attached));
+  await app.marineSpecies.simulate();app.setUIVisible(false);check('Hiding the UI releases audio',app.marineSpecies.snapshot().phase==='IDLE'&&app.marineSpecies.diagnostics().audio.activeTracks===0);app.setUIVisible(true);
+  await app.marineSpecies.simulate();const hiddenDescriptor=Object.getOwnPropertyDescriptor(w.document,'hidden');Object.defineProperty(w.document,'hidden',{configurable:true,value:true});w.document.dispatchEvent(new w.Event('visibilitychange'));
+  check('Page visibility releases audio and stops lifecycle',app.marineSpecies.snapshot().phase==='IDLE'&&app.marineSpecies.diagnostics().audio.contextState==='closed');
+  if(hiddenDescriptor)Object.defineProperty(w.document,'hidden',hiddenDescriptor);else delete w.document.hidden;w.document.dispatchEvent(new w.Event('visibilitychange'));
+  await app.marineSpecies.simulate();w.dispatchEvent(new w.PageTransitionEvent('pagehide'));check('Pagehide releases resources',app.marineSpecies.snapshot().phase==='IDLE'&&app.marineSpecies.diagnostics().audio.activeTracks===0);
+  app.select('screen.upper_right');
+  mediaDescriptor=Object.getOwnPropertyDescriptor(w.navigator,'mediaDevices');
+  const setMedia=getUserMedia=>Object.defineProperty(w.navigator,'mediaDevices',{configurable:true,value:{getUserMedia}});
+  const silentStream=()=>{const context=new w.AudioContext(),destination=context.createMediaStreamDestination();mockContexts.push(context);return destination.stream;};
+  const mic=w.document.querySelector('#marine-species-panel [data-mic]'),stop=w.document.querySelector('#marine-species-panel [data-stop]');let constraints;
+  setMedia(async value=>{constraints=value;return silentStream();});mic.click();await wait(()=>app.marineSpecies.diagnostics().audio.status==='listening');
+  check('Mock permission uses a real Analyser and requests video:false',constraints?.video===false&&constraints?.audio&&app.marineSpecies.diagnostics().audio.activeTracks===1);
+  stop.click();await wait(()=>app.marineSpecies.diagnostics().audio.activeTracks===0);check('Stopping microphone releases tracks and AudioContext',app.marineSpecies.diagnostics().audio.contextState==='closed');
+  for(const [name,label] of [['NotAllowedError','denied'],['NotFoundError','no-device']]){
+   setMedia(async()=>{throw new w.DOMException(label,name);});mic.click();await wait(()=>app.marineSpecies.diagnostics().audio.status===label);check(`Permission state ${label}`,app.marineSpecies.diagnostics().audio.activeTracks===0&&w.document.querySelector('#marine-species-panel [data-permission]').textContent.length>0);
+  }
+  let lateStream,lateRequested=false;setMedia(()=>{lateRequested=true;return new Promise(resolve=>setTimeout(()=>{lateStream=silentStream();resolve(lateStream);},100));});mic.click();await wait(()=>lateRequested);mic.click();await wait(()=>lateStream&&lateStream.getTracks().every(track=>track.readyState==='ended'));
+  check('Late streams are released after cancellation',app.marineSpecies.diagnostics().audio.activeTracks===0&&!app.marineSpecies.diagnostics().audio.pending);
+  await app.marineSpecies.simulate();check('Simulation still works after denial and cancellation',app.marineSpecies.snapshot().phase==='SIGNAL_DETECTED');app.marineSpecies.stop();
+  if(mediaDescriptor)Object.defineProperty(w.navigator,'mediaDevices',mediaDescriptor);else delete w.navigator.mediaDevices;
+  app.setView('right');await app.remoteControl({type:'suspendScene',suspend:true});await app.remoteControl({type:'suspendScene',suspend:false});
+  check('Center, reserved displays and camera content retained',reserved.every((id,i)=>app.screens.get(id).material.map===maps[i]));
+  check('Camera request retains its audio:false path',app.screens.has('screen.desk')&&w.document.querySelector('#camera-toggle'));
+  const viewBefore=app.marineSpecies.snapshot().view;await app.remoteControl({type:'marineOrbit',dx:.3,dy:.15});await app.remoteControl({type:'marineZoom',factor:1.2});
+  check('Marine orbit and zoom controls reach actual installation state',app.marineSpecies.snapshot().view.yaw!==viewBefore.yaw&&app.marineSpecies.snapshot().view.zoom>viewBefore.zoom);
+  await app.remoteControl({type:'marineContact',input:{active:true,x:.4,y:-.2,strength:.8}});check('Marine contact field stays independent from AIR',app.marineSpecies.snapshot().touch.active&&!app.airSpecies.snapshot().input.active);await app.remoteControl({type:'marineContact',input:{active:false}});await app.remoteControl({type:'marineView',patch:{yaw:0,pitch:0,zoom:1}});
+  remoteFrame=document.createElement('iframe');remoteFrame.src='/marine-remote.html?target='+app.marineSpecies.sessionId;remoteFrame.title='Marine remote test';document.body.append(remoteFrame);await wait(()=>remoteFrame.contentWindow.marineRemote,30000);
+  const rw=remoteFrame.contentWindow;let remoteStream;
+  Object.defineProperty(rw.navigator,'mediaDevices',{configurable:true,value:{getUserMedia:async()=>{const c=new rw.AudioContext(),destination=c.createMediaStreamDestination(),osc=c.createOscillator(),gain=c.createGain();gain.gain.value=.14;osc.connect(gain).connect(destination);osc.start();await c.resume();mockContexts.push(c);remoteStream=destination.stream;return remoteStream;}}});
+  rw.document.querySelector('#marine-mic').click();await wait(()=>rw.marineRemote.diagnostics().audio.status==='listening',10000);await wait(()=>app.marineSpecies.snapshot().phase==='SIGNAL_DETECTED'||app.marineSpecies.snapshot().phase==='APPROACH',10000);
+  check('Controller local Analyser volume packets trigger the installation',rw.marineRemote.diagnostics().audio.activeTracks===1&&app.marineSpecies.diagnostics().audio.activeTracks===0);
+  rw.document.querySelector('#marine-input-done').click();await wait(()=>rw.marineRemote.diagnostics().audio.activeTracks===0);check('DONE preserves the approaching organism',!['IDLE','LISTENING'].includes(app.marineSpecies.snapshot().phase));
+  check('Controller DONE ends input and releases its generated stream and AudioContext',remoteStream.getTracks().every(track=>track.readyState==='ended')&&rw.marineRemote.diagnostics().audio.contextState==='closed');await wait(()=>app.marineSpecies.snapshot().phase==='ECHO',10000);check('The organism completes its response after DONE',app.marineSpecies.diagnostics().audio.activeVoices>0);app.marineSpecies.stop();remoteFrame.remove();remoteFrame=null;
+  app.select(null);check('GPU no errors',app.renderer.getContext().getError()===0);
+  out.textContent=checks.join('\n')+'\n\n'+JSON.stringify({baselineWithoutMarineRendering:baselineSample,performance:performanceSample,marine:app.marineSpecies.diagnostics()},null,2)+'\n\nReal: WebGL, twelve displays, frame loop, AudioContext/Analyser. Mocked: permissions, device streams and visibility events. No physical microphone or camera accessed.';document.body.dataset.passed='true';
+ }catch(e){out.textContent+='\nFAIL '+e.message;document.body.dataset.passed='false';console.error(e);}
+ finally{remoteFrame?.remove();if(mediaDescriptor)Object.defineProperty(frame.contentWindow.navigator,'mediaDevices',mediaDescriptor);for(const context of mockContexts)context.close().catch(()=>{});button.disabled=false;}
+};
+</script></html>
