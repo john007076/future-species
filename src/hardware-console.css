@@ -60,3 +60,9 @@
 .marine-remote .console-shell [data-marine-pad]{width:100%;height:auto}
 #selection #editor-status{opacity:1;color:#52634f;font-size:8px;line-height:1.8}
 [data-marine-pad].rotation-locked{cursor:default!important}
+
+/* Navigation must remain visible even when the console is narrow. */
+.console-shell .air-entry-panel{display:block}
+.console-shell .air-entry-panel .section-title{margin-bottom:12px}
+.console-shell .air-entry-buttons{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(140px,100%),1fr));min-width:0;width:100%;gap:10px}
+.console-shell .air-entry-buttons .key{min-width:0;overflow-wrap:anywhere}

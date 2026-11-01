@@ -1,3 +1,4 @@
+import {displayNavigationTarget} from './display-navigation.js';
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
@@ -155,9 +156,8 @@ const dataBridge=createDataBridge({setDisplay,setContent:(id,content)=>setScreen
 async function handleRemoteControl(message){
  if(!message?.type)return;
  if(message.type==='suspendScene'){renderSuspended=!!message.suspend;lastAirTime=null;lastMarineTime=null;if(renderSuspended)marinePanel.stop();return renderSuspended;}
- if(message.type==='openMarineViews'){marinePanel.stop();location.assign('./marine.html');return true;}
+ const destination=displayNavigationTarget(message);if(destination){if(destination==='./'){renderSuspended=false;return true;}marinePanel.stop();location.assign(destination);return true;}
  if(message.type.startsWith('marine'))return applyMarineRemoteControl({message,marine,panel:marinePanel,onTelemetry:()=>remote?.sendState(marineTelemetry(marine,marineChannels)),onChannel:async(id,enabled)=>{if(!marineChannels.has(id))return false;marineChannels.set(id,enabled);if(enabled)await restoreScreenContent(id);else setDisplay(id,{mode:'blank'});return true;}});
- if(message.type==='openAirViews'){renderSuspended=true;marinePanel.stop();location.assign('./air.html');return true;}
  if(message.type.startsWith('air'))return applyAirRemoteControl({flight:airFlight,message,onReset:resetAirFlight,onTelemetry:()=>remote?.sendState(airTelemetry(airFlight.state,airViewStates)),onViewState:setAirViewState});
  if(message.type==='select')return select(message.id);
  if(message.type==='view')return chooseView(message.name);

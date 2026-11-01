@@ -56,7 +56,7 @@ $('#upload').addEventListener('click',()=>$('#file').click());
 $('#file').addEventListener('change',async event=>{const file=event.target.files[0];if(!file)return;try{$('#upload').disabled=true;status(`Sending ${file.name}…`);const response=await fetch('./api/media',{method:'POST',headers:{'Content-Type':file.type||'application/octet-stream','X-File-Name':encodeURIComponent(file.name)},body:file});if(!response.ok)throw new Error('Media upload failed');const media=await response.json();send({type:'upload',id:selected,url:media.url,name:media.name});status('Media sent to main display');}catch(error){status(error.message);}finally{$('#upload').disabled=false;event.target.value='';}});
 document.querySelector('#air-views-link').addEventListener('click',event=>{event.preventDefault();send({type:'openAirViews'});status('Living views opened on the main display. This console stays here.');});
 document.querySelector('#air-remote-link').addEventListener('click',event=>{event.preventDefault();send({type:'suspendScene',suspend:true});setTimeout(()=>location.href='./air-remote.html',80);});
-document.querySelector('#main-home-link').addEventListener('click',()=>send({type:'suspendScene',suspend:false}));
+document.querySelector('#main-home-link').addEventListener('click',event=>{event.preventDefault();send({type:'openMainDisplay'});status('Main installation opened on the display. This console stays here.');});
 send({type:'suspendScene',suspend:false});
 setInterval(()=>{send({type:'state'});if(lastState&&Date.now()-lastState>6500){$('#connection-dot').classList.remove('online');$('#connection-label').textContent='Waiting for main display';}},5000);
 send({type:'state'});render();

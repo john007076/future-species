@@ -1,3 +1,4 @@
+import {displayNavigationTarget} from '../../display-navigation.js';
 import * as THREE from 'three';
 import {MARINE_SCREEN_IDS,createMarineState,SPECIES} from './state.js';
 import {createMarineViews} from './views.js';
@@ -18,7 +19,7 @@ const panel=createMarinePanel({marine,audio});panel.show(MARINE_SCREEN_IDS[0]);
 const channels=new Map(MARINE_SCREEN_IDS.map(id=>[id,true])),figures=[...document.querySelectorAll('.marine-view-grid figure[data-channel]')],scene=new THREE.Scene(),camera=new THREE.OrthographicCamera(-1,1,1,-1,0,2),material=new THREE.MeshBasicMaterial({toneMapped:false}),geometry=new THREE.PlaneGeometry(2,2);camera.position.z=1;scene.add(new THREE.Mesh(geometry,material));
 function onChannel(id,enabled){if(!channels.has(id))return false;channels.set(id,enabled);return true;}
 const telemetry=()=>remote.sendState(marineTelemetry(marine,channels,'views'));
-const remote=createRemoteChannel({onControl:message=>{try{if(message.type==='openAirViews'){panel.stop();location.assign('./air.html');return;}applyMarineRemoteControl({message,marine,panel,onTelemetry:telemetry,onChannel});}catch(error){document.querySelector('#marine-live').textContent=error.message;}}});
+const remote=createRemoteChannel({onControl:message=>{try{const destination=displayNavigationTarget(message);if(destination){panel.stop();location.assign(destination);return;}applyMarineRemoteControl({message,marine,panel,onTelemetry:telemetry,onChannel});}catch(error){document.querySelector('#marine-live').textContent=error.message;}}});
 const micButton=document.querySelector('#marine-mic'),simulateButton=document.querySelector('#marine-simulate');
 document.querySelector('#marine-input-done').addEventListener('click',()=>void panel.finishInput());
 micButton.addEventListener('click',()=>{if(!['IDLE','LISTENING'].includes(marine.state.phase)||['listening','requesting'].includes(audio.status))panel.stop();else void panel.startMicrophone();});

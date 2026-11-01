@@ -1,3 +1,4 @@
+import {displayNavigationTarget} from './display-navigation.js';
 import {AIR_SCREEN_IDS,createAirSpeciesState} from './air-species-state.js';
 import {createAirSpeciesViews} from './air-species-views.js';
 import {createRemoteChannel} from './remote-channel.js';
@@ -27,7 +28,7 @@ function renderViews(){
 function sendTelemetry(){remote.sendState(airTelemetry(flight.state,viewStates));}
 function setViewState(id,enabled){if(!viewStates.has(id))return;viewStates.set(id,enabled);renderViews();sendTelemetry();}
 function resetFlight(){flight.reset();renderViews();sendTelemetry();}
-const remote=createRemoteChannel({onControl(message){applyAirRemoteControl({flight,message,onReset:resetFlight,onTelemetry:sendTelemetry,onViewState:setViewState});}});
+const remote=createRemoteChannel({onControl(message){const destination=displayNavigationTarget(message);if(destination){location.assign(destination);return;}applyAirRemoteControl({flight,message,onReset:resetFlight,onTelemetry:sendTelemetry,onViewState:setViewState});}});
 remote.sendControl({type:'suspendScene',suspend:true});
 renderViews();document.querySelector('#air-loading').remove();
 const stopFitting=fitLivingViews(document.querySelector('#air-grid'));
