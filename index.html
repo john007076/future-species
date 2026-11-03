@@ -26,21 +26,21 @@
  <nav id="controls" aria-label="Camera views">
   <button data-view="reference" aria-pressed="true">REFERENCE</button><button data-view="front" aria-pressed="false">FRONT</button><button data-view="left" aria-pressed="false">LEFT</button><button data-view="right" aria-pressed="false">RIGHT</button><button data-view="back" aria-pressed="false">REAR</button><button data-view="top" aria-pressed="false">TOP</button><button data-view="seat" aria-pressed="false">SEAT</button><span class="divider"></span><button id="hide-ui" title="Press H to restore the interface">HIDE UI</button>
  </nav>
- <div id="utility-controls"><button id="camera-toggle">START CAMERA</button><button id="flip-camera">FLIP CAMERA</button><a href="./controller.html" target="_blank" rel="noopener">REMOTE CONSOLE</a></div>
+ <div id="utility-controls"><button id="camera-toggle">CAMERA</button><button id="flip-camera">FLIP</button><a href="./controller.html" target="_blank" rel="noopener">CONSOLE</a></div>
  <div id="toast" role="status" hidden></div>
  <aside id="selection" aria-label="Hardware editor" hidden>
   <div class="panel-heading"><div><small>SELECTED HARDWARE</small><strong id="selection-name"></strong></div><button id="clear-selection" aria-label="Clear selection">×</button></div>
-  <fieldset class="hardware-only"><legend>Angle <span>SLIDER / DEGREES</span></legend>
+  <fieldset class="hardware-only"><legend>ANGLE <span>X / Y / Z</span></legend>
    <label class="angle-control">X <input type="range" min="-180" max="180" step="1" data-rotation-slider="0" aria-label="X Angle slider"/><input type="number" min="-360" max="360" step="1" data-rotation="0" aria-label="X Angle input"/></label>
    <label class="angle-control">Y <input type="range" min="-180" max="180" step="1" data-rotation-slider="1" aria-label="Y Angle slider"/><input type="number" min="-360" max="360" step="1" data-rotation="1" aria-label="Y Angle input"/></label>
    <label class="angle-control">Z <input type="range" min="-180" max="180" step="1" data-rotation-slider="2" aria-label="Z Angle slider"/><input type="number" min="-360" max="360" step="1" data-rotation="2" aria-label="Z Angle input"/></label>
-   <button id="reset-hardware" class="reset-button">RESTORE TRANSFORM</button>
+   <button id="reset-hardware" class="reset-button">RESET ANGLE</button>
   </fieldset>
-  <details class="screen-only position-advanced"><summary>ADVANCED / XYZ POSITION</summary><div class="vector-grid">
+  <details class="screen-only position-advanced"><summary>POSITION / XYZ</summary><div class="vector-grid">
    <label>X <input type="number" step="0.01" min="-30" max="30" data-position="0" aria-label="Position X"/></label><label>Y <input type="number" step="0.01" min="-30" max="30" data-position="1" aria-label="Position Y"/></label><label>Z <input type="number" step="0.01" min="-30" max="30" data-position="2" aria-label="Position Z"/></label>
   </div></details>
   <div class="screen-only">
-   <fieldset><legend>DISPLAY SETTINGS</legend>
+   <fieldset><legend>DISPLAY</legend>
     <label class="wide">SOURCE <select id="screen-select"><option value="image">SOURCE IMAGE</option><option value="video">VIDEO</option><option value="live">LIVE TEXTURE</option><option value="blank">BLANK</option></select></label>
     <label>Brightness <input type="range" min="0" max="2" step="0.01" data-display="brightness"/></label>
     <label>Saturation <input type="range" min="0" max="2" step="0.01" data-display="saturation"/></label>
@@ -48,8 +48,8 @@
     <label>Scanlines <input type="range" min="0" max="0.5" step="0.01" data-display="scanlines"/></label>
     <label class="wide">Tint <input type="color" data-display="tint"/></label>
    </fieldset>
-   <div class="button-grid"><button id="content-upload">UPLOAD IMAGE / VIDEO</button><button id="content-blank">BLANK</button><button id="content-demo">LIVE TEXTURE</button><button id="content-restore">RESTORE SOURCE</button></div>
-   <details><summary>LAYOUT / PROJECT</summary><div class="button-grid"><button id="save-project">SAVE TO PROJECT</button><button id="export-layout">EXPORT JSON</button><button id="import-layout">IMPORT JSON</button></div></details>
+   <div class="button-grid"><button id="content-upload">UPLOAD</button><button id="content-blank">BLANK</button><button id="content-demo">LIVE</button><button id="content-restore">SOURCE</button></div>
+   <details><summary>PROJECT</summary><div class="button-grid"><button id="save-project">SAVE</button><button id="export-layout">EXPORT</button><button id="import-layout">IMPORT</button></div></details>
    <input id="content-file" type="file" accept="image/*,video/*" hidden/><input id="layout-file" type="file" accept="application/json,.json" hidden/>
   </div>
   <p id="editor-status" role="status"></p>

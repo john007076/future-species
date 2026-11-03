@@ -1,68 +1,166 @@
-/* Shared instrument finish; controls retain their existing event targets. */
-:root{--instrument-ink:#243a33;--instrument-orange:#f45116;--instrument-case:#e6e2d5}
-.console-shell{color:var(--instrument-ink);background:linear-gradient(115deg,#f1eee5,#d4d0c4);border:1px solid #fcfaf1;border-radius:5px;box-shadow:0 18px 40px #26332b33,inset 0 -3px 0 #b7b4a9}
-.console-header{position:relative;min-height:100px;border-bottom:5px solid #28332e;padding-right:170px}
-.console-header:after{content:'';position:absolute;right:0;top:0;width:145px;height:86px;background:repeating-linear-gradient(0deg,#e4e0d5 0 5px,#a9aaa0 5px 7px);border:1px solid #bcbdb1;border-radius:2px;box-shadow:inset 0 0 0 12px #dfdbcf44;pointer-events:none}
-.console-header h1{font-size:23px;letter-spacing:-.04em;color:#184f3e}.console-header p{color:#7a7060}.console-header .connection{margin-left:14px}
-.console-shell .panel{border-radius:2px;border-color:#b5b7a9;background:linear-gradient(120deg,#e8e5d9,#dbd8cb);box-shadow:inset 0 1px #fff9,0 2px 3px #51574b20}
-.section-title{border-color:#a8ada0}.section-title>span{border-radius:2px;background:#1f3f32;color:#f1f0dc;border:0}.section-title h2{color:#254638}
-.console-shell .connection,.console-shell .readout,.console-shell .knob-number{background:linear-gradient(110deg,#101a17,#254338);color:#c5e1a9;border:2px solid #787f70;border-radius:2px;box-shadow:inset 0 2px 8px #0009}
-.console-shell .key,.console-shell .screen-key{background:linear-gradient(125deg,#303631,#141b17);color:#ebe8db;border:1px solid #111a14;border-radius:3px;box-shadow:inset 0 1px #72786a,0 3px 0 #111811,0 5px 5px #26352d44}
-.console-shell .key.light,.console-shell .marine-specimen-grid button{background:linear-gradient(125deg,#f6f2e6,#d4d1c4);color:#224e3b;border-color:#777e6e;box-shadow:inset 0 1px #fff,0 3px 0 #9c9f90,0 5px 5px #26352d33}
-.console-shell .key.orange,.console-shell .screen-key.active,.console-shell .marine-specimen-grid .active{color:#fff4da;background:linear-gradient(125deg,#ff6c21,#e33d0b);border-color:#ae3a10;box-shadow:inset 0 1px #ffa778,0 3px 0 #a9350e,0 5px 5px #61281044}
-.console-shell button:active{transform:translateY(2px);box-shadow:inset 0 2px 4px #0006}.console-shell button:focus-visible{outline:2px solid #f45116;outline-offset:4px}
-.console-shell .selected{outline-color:#f45116}.console-shell input{accent-color:#f45116}.console-shell .knob{background:repeating-conic-gradient(#8d9385 0 2deg,#d7d9cb 2deg 6deg)}.console-shell .knob-cap{background:linear-gradient(135deg,#fcfaf1,#cfcec2 55%,#a4aa9a)}.console-shell .knob-indicator{background:#f45116}
-.console-shell .air-control-pad,.console-shell [data-marine-pad],.console-shell .touchpad{background:radial-gradient(ellipse at 50% 35%,#234738,#0c1c16)!important;border:5px solid #b1b5a6!important;border-radius:2px;box-shadow:inset 0 3px 14px #0009,0 1px #fff;color:#c0d6a3}
-.console-shell footer{color:#52614f}.console-shell .section-title small{color:#64715f}
-:is(#selection,#air-species-panel,#marine-species-panel,#controls,#utility-controls){color-scheme:light;color:#263d32;background:linear-gradient(125deg,#eeeaddf7,#d5d3c5f7);border:1px solid #f8f4e5;border-radius:4px;box-shadow:inset 0 -2px #a9ad9d,0 9px 24px #192d3233;backdrop-filter:blur(12px)}
-:is(#selection,#air-species-panel,#marine-species-panel) :is(small,label,summary,p,output,.marine-channel,.marine-state,.air-channel,.air-speed,.air-pad-heading,.air-coordinates,.air-field-meta,.marine-pad-heading){color:#405b49}
-:is(#air-species-panel,#marine-species-panel) .air-heading{padding:9px 8px;border-left:5px solid #f45116;background:linear-gradient(90deg,#173b2d,#20392e);color:#f0ecda;margin-bottom:12px}
-:is(#air-species-panel,#marine-species-panel) .air-heading :is(h2,small){color:#d7e3bc}
-:is(#selection,#air-species-panel,#marine-species-panel,#controls,#utility-controls) :is(button,.air-open-focus){color:#253e31;background:linear-gradient(130deg,#fff9ec,#d3d2c4);border:1px solid #939b87;border-radius:2px;box-shadow:inset 0 1px #fff,0 2px #8e9584}
-:is(#air-species-panel,#marine-species-panel) :is(.air-open-focus,[data-call]){background:linear-gradient(130deg,#ff6b23,#e64713);color:#fff8e5;border-color:#b74014}
-:is(#selection,#air-species-panel,#marine-species-panel) :is(select,input[type=number],input[type=text]){color:#d9e5bf;background:#193b2d;border:1px solid #82937a;border-radius:2px}
-:is(#air-species-panel,#marine-species-panel) :is(.air-xy-pad,[data-marine-pad],canvas){background:radial-gradient(ellipse,#284b3a,#0f261b);border:4px solid #aeb6a1;box-shadow:inset 0 2px 10px #0007;border-radius:2px}
-:is(#air-species-panel,#marine-species-panel) input{accent-color:#f45116}
-#marine-species-panel [data-marine-pad] span{background:#173728;color:#c4d9a7}
-@media(max-width:680px){.console-header{padding-right:0;min-height:100px}.console-header:after{display:none}.console-header h1{font-size:17px}.console-header .connection{margin-left:0}}
-.marine-remote .console-shell .screen-key.active{background:linear-gradient(125deg,#315c46,#173a2b);color:#dce7c4;border-color:#143324;box-shadow:inset 0 1px #749879,0 3px #10271c,0 5px 5px #26352d33}
-.marine-remote .console-shell .screen-key.selected{background:linear-gradient(125deg,#ff6c21,#e33d0b);color:#fff4da;border-color:#ae3a10;outline:1px solid #f45116}
-/* Keep every marine field as clear as the AIR coordinate pads. */
-:is(#marine-species-panel,.marine-remote) [data-marine-pad]{position:relative;display:block;overflow:hidden;aspect-ratio:1.85}
-:is(#marine-species-panel,.marine-remote) [data-marine-pad]:before{content:'';position:absolute;left:6%;right:6%;top:50%;border-top:1px solid #a8bfb748;pointer-events:none}
-:is(#marine-species-panel,.marine-remote) [data-marine-pad]:after{content:'';position:absolute;top:7%;bottom:7%;left:50%;border-left:1px solid #a8bfb748;pointer-events:none}
-:is(#marine-species-panel,.marine-remote) [data-marine-pad] .instrument-pad-target{position:absolute;left:var(--pad-x,50%);top:var(--pad-y,50%);width:18px;height:18px;padding:0;border:1px solid #d1cbb890;border-radius:50%;background:transparent;transform:translate(-50%,-50%);pointer-events:none;z-index:1}
-.instrument-pad-target:after{content:'';position:absolute;width:4px;height:4px;left:6px;top:6px;border-radius:50%;background:#d1cbb8}
-[data-marine-pad].is-active .instrument-pad-target{border-color:#f4bb8d!important;box-shadow:0 0 12px #e5c89133}
-:is(#marine-species-panel,.marine-remote) .instrument-pad-help{font-size:7px;line-height:1.8;text-align:center;color:#52634f;margin:7px 0 12px;letter-spacing:.025em}
-:is(#air-species-panel,#marine-species-panel,#selection){line-height:1.65;letter-spacing:.025em}
-:is(#air-species-panel,#marine-species-panel) .air-heading h2{font-size:16px;letter-spacing:.08em}
-:is(#air-species-panel,#marine-species-panel) .air-open-focus{font-size:9px;letter-spacing:.025em;padding:10px}
-:is(#air-species-panel,#marine-species-panel) :is(.air-channel,.marine-channel){padding:9px 0;font-size:7px;border-color:#89968066}
-:is(#air-species-panel,#marine-species-panel) :is(.air-channel strong,.marine-channel b,.marine-state>span,.marine-range output,.air-pad-heading>span,.air-field-meta>span,.air-parameters output,.air-flight-tuning summary span){color:#49614d}
-#air-species-panel .air-parameters label{color:#2e4838;text-align:left;grid-template-columns:1fr auto;font-size:9px}
-#air-species-panel :is(.air-flight-tuning summary,#air-field-help){color:#49614d}
-:is(#air-species-panel,#marine-species-panel) :is(.air-pad-heading,.marine-pad-heading){display:flex;justify-content:space-between;gap:8px;font-size:7px;margin:12px 0 7px}
-#marine-species-panel .marine-state{display:grid;grid-template-columns:6px 1fr;gap:3px 7px;margin:11px 0;font-size:8px}
-#marine-species-panel .marine-state>span{grid-column:2;margin-left:0;font-size:7px}
-#marine-species-panel .marine-range{font-size:9px;margin:12px 0;gap:6px}
-#marine-species-panel .marine-permission{font-size:8px;line-height:1.7;border-top:1px solid #89968066;padding-top:10px;margin-top:15px}
-#marine-species-panel .marine-privacy{font-size:7px;line-height:1.8;color:#52634f}
-#marine-species-panel .marine-actions button{font-size:9px;padding:10px 5px}
-#selection :is(legend,legend span,.panel-note,.display-note){color:#405b49}
-#selection legend{font-size:9px;letter-spacing:.05em;margin-bottom:8px}
-#selection label{font-size:9px;line-height:1.6;gap:8px}
-#selection label.wide{display:grid;grid-template-columns:60px minmax(0,1fr)}
-#selection select{width:100%;min-width:0;font-size:9px;padding:5px}
-#selection fieldset{border-color:#89968066;margin-bottom:13px}
-#selection :is(button,summary){font-size:9px;line-height:1.6;letter-spacing:.025em}
-#selection :is(p,small){font-size:8px;line-height:1.8;color:#52634f;opacity:1}
-.marine-remote .console-shell [data-marine-pad]{width:100%;height:auto}
-#selection #editor-status{opacity:1;color:#52634f;font-size:8px;line-height:1.8}
-[data-marine-pad].rotation-locked{cursor:default!important}
+:root {
+  --instrument-ink: #29302b;
+  --instrument-muted: #6c746b;
+  --instrument-orange: #ef5b24;
+  --instrument-case: #e8e7df;
+  --instrument-line: #b8bcb1;
+  --instrument-screen: #14221c;
+}
 
-/* Navigation must remain visible even when the console is narrow. */
-.console-shell .air-entry-panel{display:block}
-.console-shell .air-entry-panel .section-title{margin-bottom:12px}
-.console-shell .air-entry-buttons{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(140px,100%),1fr));min-width:0;width:100%;gap:10px}
-.console-shell .air-entry-buttons .key{min-width:0;overflow-wrap:anywhere}
+body :is(#selection, #air-species-panel, #marine-species-panel, #controls, #utility-controls),
+body :is(#selection, #air-species-panel, #marine-species-panel, #controls, #utility-controls) * {
+  font-family: Arial, "PingFang SC", sans-serif !important;
+}
+
+:is(#selection, #air-species-panel, #marine-species-panel) {
+  color-scheme: light;
+  color: var(--instrument-ink);
+  border: 1px solid #faf8ee;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #efeee6f5, #dcded4f5);
+  box-shadow: inset 0 -2px #a9ad9d55, 0 12px 30px #192d3230;
+  backdrop-filter: blur(16px);
+  line-height: 1.5;
+  letter-spacing: .015em;
+  scrollbar-color: #a4aa9d transparent;
+}
+
+:is(#selection, #air-species-panel, #marine-species-panel) :is(small, label, summary, p, output, legend, .marine-channel, .marine-state, .air-channel, .air-speed, .air-pad-heading, .air-coordinates, .air-field-meta, .marine-pad-heading) {
+  color: var(--instrument-muted);
+}
+
+:is(#air-species-panel, #marine-species-panel) .air-heading {
+  margin: -2px -2px 13px;
+  padding: 13px 14px;
+  color: #edf0e5;
+  border: 1px solid #111a15;
+  border-left: 4px solid var(--instrument-orange);
+  border-radius: 6px;
+  background: #17241e;
+  box-shadow: inset 0 2px 8px #0005;
+}
+:is(#air-species-panel, #marine-species-panel) .air-heading :is(h2, small) { color: #e0e7d7; }
+:is(#air-species-panel, #marine-species-panel) .air-heading h2 { font-size: 18px; font-weight: 600; letter-spacing: -.02em; }
+.air-indicator { background: #d8e4cb; box-shadow: 0 0 8px #d8e4cb44; }
+:is(#air-species-panel, #marine-species-panel)[data-behaviour=responding] .air-indicator,
+#air-species-panel[data-field-behaviour=attracting] .air-indicator { background: var(--instrument-orange); }
+
+:is(#selection, #air-species-panel, #marine-species-panel, #controls, #utility-controls) :is(button, .air-open-focus) {
+  color: #2d352e;
+  border: 1px solid #a8aea0;
+  border-radius: 5px;
+  background: linear-gradient(#f8f7ef, #d8dbd0);
+  box-shadow: inset 0 1px #fff, 0 2px 0 #979e8f;
+  font-size: 9px;
+}
+:is(#selection, #air-species-panel, #marine-species-panel, #controls, #utility-controls) :is(button, .air-open-focus):hover {
+  background: #fffdf4;
+  outline-color: var(--instrument-orange);
+}
+:is(#selection, #air-species-panel, #marine-species-panel, #controls, #utility-controls) :is(button, .air-open-focus):active { transform: translateY(1px); box-shadow: inset 0 2px 4px #0002; }
+:is(#selection, #air-species-panel, #marine-species-panel) :is(button, .air-open-focus, input, select, summary, [tabindex]):focus-visible { outline: 2px solid var(--instrument-orange); outline-offset: 3px; }
+:is(#air-species-panel, #marine-species-panel) :is(.air-open-focus, [data-call]) {
+  color: #fff8ed;
+  border-color: #bd4319;
+  background: linear-gradient(#fa6d31, #df491a);
+  box-shadow: inset 0 1px #ffb48d, 0 2px 0 #a53a16;
+}
+
+:is(#selection, #air-species-panel, #marine-species-panel) :is(select, input[type=number], input[type=text]) {
+  color: #dce7d3;
+  border: 1px solid #111a15;
+  border-radius: 4px;
+  background: #18271f;
+}
+:is(#selection, #air-species-panel, #marine-species-panel) input { accent-color: var(--instrument-orange); }
+:is(#selection, #air-species-panel, #marine-species-panel) input[type=range] { height: 3px; cursor: ew-resize; }
+:is(#air-species-panel, #marine-species-panel) :is(.air-xy-pad, [data-marine-pad]) {
+  border: 4px solid #b5bbac;
+  border-radius: 6px;
+  background: radial-gradient(ellipse at 50% 35%, #233b30, #101d17);
+  box-shadow: inset 0 3px 12px #0008, 0 1px #fff;
+}
+
+#controls {
+  gap: 4px;
+  padding: 5px;
+  color: var(--instrument-ink);
+  border: 1px solid #f8f6eb;
+  border-radius: 8px;
+  background: #e6e6dcf0;
+  box-shadow: 0 6px 18px #23362d25;
+}
+#controls .divider { border-color: #b5baae; }
+#utility-controls { gap: 6px; }
+#utility-controls :is(button, a) {
+  color: var(--instrument-ink);
+  border: 1px solid #faf8ee;
+  border-radius: 6px;
+  background: #e8e7dfed;
+  box-shadow: 0 2px 0 #9da397, 0 5px 14px #22332a20;
+}
+#utility-controls a { background: #28352e; color: #eef0e4; border-color: #1a241e; }
+
+#selection { width: 292px; padding: 16px; }
+#selection .panel-heading { margin-bottom: 14px; padding-bottom: 13px; border-bottom: 1px solid var(--instrument-line); }
+#selection .panel-heading small { margin-bottom: 6px; color: var(--instrument-muted); font-size: 7px; letter-spacing: .14em; opacity: 1; }
+#selection .panel-heading strong { display: block; max-width: 220px; font-size: 14px; line-height: 1.35; font-weight: 600; }
+#selection .panel-heading button { min-width: 26px; min-height: 26px; padding: 1px; font-size: 16px; }
+#selection fieldset { margin: 0 0 13px; padding: 12px 0 4px; border-color: var(--instrument-line); }
+#selection legend { margin-bottom: 8px; padding-right: 8px; color: var(--instrument-ink); font-size: 9px; font-weight: 600; letter-spacing: .07em; }
+#selection legend span { color: var(--instrument-muted); font-size: 7px; font-weight: 400; opacity: 1; }
+#selection label { gap: 8px; margin: 9px 0; font-size: 9px; }
+#selection label.wide { grid-template-columns: 66px minmax(0, 1fr); }
+#selection select { width: 100%; min-width: 0; padding: 6px; font-size: 9px; }
+#selection input[type=color] { height: 26px; padding: 2px; border: 1px solid var(--instrument-line); border-radius: 4px; }
+#selection .angle-control { grid-template-columns: 16px minmax(0, 1fr) 56px; }
+#selection .button-grid { gap: 7px; }
+#selection .button-grid button { min-height: 35px; padding: 7px 5px; }
+#selection details { border-color: var(--instrument-line); }
+#selection summary { font-size: 9px; opacity: 1; }
+#selection #editor-status { margin: 12px 0 0; color: var(--instrument-muted); font-size: 8px; opacity: 1; }
+#selection #editor-status.error { color: #a33e21; }
+
+:is(#air-species-panel, #marine-species-panel) :is(.air-channel, .marine-channel) {
+  margin: 0;
+  padding: 8px 0;
+  border-color: var(--instrument-line);
+  font-size: 8px;
+}
+:is(#air-species-panel, #marine-species-panel) :is(.air-channel strong, .marine-channel b) { color: var(--instrument-ink); font-weight: 600; }
+:is(#air-species-panel, #marine-species-panel) .air-open-focus { margin: 8px 0 13px; padding: 10px 12px; font-size: 9px; font-weight: 600; }
+:is(#air-species-panel, #marine-species-panel) :is(.air-pad-heading, .marine-pad-heading) { display: flex; justify-content: space-between; gap: 8px; margin: 12px 0 7px; font-size: 8px; font-weight: 600; }
+:is(#air-species-panel, #marine-species-panel) :is(.air-coordinates, .air-field-meta) { font-size: 8px; }
+:is(#air-species-panel, #marine-species-panel) :is(.air-coordinates output, .air-field-meta output, .air-parameters output, .marine-range output) { color: var(--instrument-ink); }
+
+#air-species-panel .air-parameters { border-color: var(--instrument-line); }
+#air-species-panel .air-parameters label { grid-template-columns: 1fr auto; margin: 10px 0 12px; color: var(--instrument-ink); font-size: 9px; text-align: left; }
+#air-species-panel .air-flight-tuning { border-color: var(--instrument-line); }
+#air-species-panel .air-flight-tuning summary { color: var(--instrument-ink); font-size: 9px; }
+#air-species-panel .air-reset { margin-top: 7px; padding: 9px 11px; }
+#air-field-help { display: none; }
+
+#marine-species-panel .marine-state { display: grid; grid-template-columns: 7px 1fr; gap: 3px 7px; margin: 12px 0; font-size: 9px; }
+#marine-species-panel .marine-state > span { grid-column: 2; margin-left: 0; font-size: 8px; }
+#marine-species-panel .marine-state i { background: var(--instrument-orange); }
+#marine-species-panel canvas { border-color: var(--instrument-line); border-radius: 5px; }
+#marine-species-panel .marine-range { gap: 7px; margin: 12px 0; color: var(--instrument-ink); font-size: 9px; }
+#marine-species-panel .marine-actions { gap: 6px; }
+#marine-species-panel .marine-actions button { padding: 9px 5px; font-size: 8px; }
+#marine-species-panel .marine-permission { min-height: 0; margin: 11px 0 7px; font-size: 8px; }
+#marine-species-panel .marine-privacy { margin: 10px 0 0; padding-top: 10px; color: var(--instrument-muted); border-top: 1px solid var(--instrument-line); font-size: 7px; line-height: 1.6; }
+#marine-species-panel select { padding: 7px; font-size: 9px; }
+
+:is(#marine-species-panel, .marine-remote) [data-marine-pad] { position: relative; display: block; overflow: hidden; aspect-ratio: 1.85; }
+:is(#marine-species-panel, .marine-remote) [data-marine-pad]:before { content: ''; position: absolute; left: 6%; right: 6%; top: 50%; border-top: 1px solid #a8bfb748; pointer-events: none; }
+:is(#marine-species-panel, .marine-remote) [data-marine-pad]:after { content: ''; position: absolute; top: 7%; bottom: 7%; left: 50%; border-left: 1px solid #a8bfb748; pointer-events: none; }
+:is(#marine-species-panel, .marine-remote) [data-marine-pad] .instrument-pad-target { position: absolute; left: var(--pad-x, 50%); top: var(--pad-y, 50%); z-index: 1; width: 20px; height: 20px; padding: 0; border: 1px solid #d8e2cfaa; border-radius: 50%; background: transparent; box-shadow: none; transform: translate(-50%, -50%); pointer-events: none; }
+.instrument-pad-target:after { content: ''; position: absolute; left: 7px; top: 7px; width: 4px; height: 4px; border-radius: 50%; background: #d8e2cf; }
+[data-marine-pad].is-active .instrument-pad-target { border-color: #ff9b68 !important; box-shadow: 0 0 12px #ef5b2444; }
+[data-marine-pad].rotation-locked { cursor: default !important; }
+:is(#marine-species-panel, .marine-remote) .instrument-pad-help { margin: 7px 0 12px; color: var(--instrument-muted); font-size: 7px; line-height: 1.6; text-align: center; }
+
+@media (max-width: 680px) {
+  #selection { width: 280px; }
+  :is(#selection, #air-species-panel, #marine-species-panel) { backdrop-filter: none; }
+}

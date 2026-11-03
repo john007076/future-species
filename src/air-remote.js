@@ -1,6 +1,5 @@
 import {AIR_SCREEN_IDS,AIR_DEFAULTS,createAirSpeciesState} from './air-species-state.js';
 import {createRemoteChannel} from './remote-channel.js';
-import './hardware-console.css';
 
 const flight=createAirSpeciesState(),channels=new Map(AIR_SCREEN_IDS.map(id=>[id,true])),modeLabels={floating:'Floating',responding:'Following airflow',gliding:'Gliding'},fieldLabels={resting:'Waiting for touch',attracting:'Attraction and flow',relaxing:'Relaxing'};
 const $=selector=>document.querySelector(selector),clamp=(value,min=0,max=1)=>Math.max(min,Math.min(max,value)),signed=value=>(value>=0?'+':'−')+Math.abs(value).toFixed(2);

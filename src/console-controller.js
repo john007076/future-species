@@ -1,21 +1,38 @@
 import * as THREE from 'three';
 import {box,mesh,rod,screws,instances} from './model-utils.js';
 
-function displayTexture(){
- const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128;const context=canvas.getContext('2d');
- context.fillStyle='#202a2a';context.fillRect(0,0,512,128);context.fillStyle='#9fb6aa';context.font='17px "FS Pixel"';context.fillText('SELECTED DISPLAY',24,31);context.fillStyle='#e0e4d4';context.font='26px "FS Pixel"';context.fillText('04  CENTER MAIN',24,78);context.fillStyle='#d97747';context.fillRect(24,101,78,5);
- const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;return texture;
+function canvasTexture(width,height,draw){
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+ draw(canvas.getContext('2d'));
+ const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;return texture;
 }
+
+function displayTexture(){return canvasTexture(512,128,context=>{
+ context.fillStyle='#14211b';context.fillRect(0,0,512,128);
+ context.fillStyle='#82978a';context.font='15px "FS Pixel"';context.fillText('ACTIVE CHANNEL',24,28);
+ context.fillStyle='#e0e8d7';context.font='27px "FS Pixel"';context.fillText('01  AIR FLIGHT',24,76);
+ context.fillStyle='#ef5b24';context.fillRect(24,101,72,4);
+});}
+
+function keyLegendTexture(){return canvasTexture(400,300,context=>{
+ context.textAlign='center';context.textBaseline='middle';context.font='22px "FS Pixel"';
+ for(let row=0;row<3;row++)for(let col=0;col<4;col++){
+  const index=row*4+col;context.fillStyle=index===0?'#fff3e4':'#d8ded5';
+  context.fillText(String(index+1).padStart(2,'0'),50+col*100,50+row*100);
+ }
+});}
 
 export function createConsoleController(mats){
  const root=new THREE.Group();root.name='instrument.console';root.userData={id:'instrument.console',kind:'instrument',label:'DESK / REMOTE CONSOLE'};
- const orange=new THREE.MeshStandardMaterial({color:0xd97845,roughness:.42,metalness:.04});
+ const orange=new THREE.MeshStandardMaterial({color:0xef5b24,roughness:.38,metalness:.03});
  box(root,'console.lowerCase',[3.3,.13,1.16],[0,.075,0],mats.cream,.055);
- box(root,'console.topPlate',[3.22,.035,1.08],[0,.155,0],mats.metal,.035);
+ box(root,'console.topPlate',[3.22,.035,1.08],[0,.155,0],mats.cream,.035);
+ box(root,'console.frontTrim',[3.08,.022,.018],[0,.115,.579],mats.dark,.005);
  for(const x of [-1.08,0,1.08])box(root,'console.panel',[1.01,.018,1.0],[x,.18,0],mats.cream,.018);
  const screenKeys=[];for(let row=0;row<3;row++)for(let col=0;col<4;col++)screenKeys.push({p:[-1.38+col*.20,.213,-.36+row*.18]});
  instances(root,'console.12ChannelKeys',new THREE.BoxGeometry(.145,.055,.125),mats.dark,screenKeys);
- box(root,'console.selectedKey',[.145,.058,.125],[-.48,.215,-.36],orange,.008);
+ box(root,'console.selectedKey',[.145,.058,.125],[-1.38,.218,-.36],orange,.008);
+ const legends=mesh(new THREE.PlaneGeometry(.79,.54),new THREE.MeshBasicMaterial({map:keyLegendTexture(),transparent:true,depthWrite:false,toneMapped:false}),root,'console.channelLegends',[-1.08,.248,-.18]);legends.rotation.x=-Math.PI/2;legends.castShadow=false;
  const lcd=mesh(new THREE.PlaneGeometry(.79,.18),new THREE.MeshBasicMaterial({map:displayTexture(),toneMapped:false}),root,'console.channelReadout',[-1.08,.211,.21]);lcd.rotation.x=-Math.PI/2;lcd.castShadow=false;
  for(let i=0;i<4;i++)box(root,'console.contentKey.'+i,[.18,.05,.12],[-1.38+i*.20,.211,.43],i===3?orange:(i===2?mats.ceramic:mats.dark),.008);
  rod(root,'console.joystick.shaft',[-.29,.2,-.15],[-.28,.40,-.16],.021,mats.metal,16);
@@ -35,6 +52,7 @@ export function createConsoleController(mats){
   box(root,'console.knobReadout.'+i,[.19,.018,.10],[x,.207,.01],mats.dark,.006);
  }
  box(root,'console.pureViewKey',[.36,.05,.12],[1.08,.211,.38],mats.ceramic,.008);
+ box(root,'console.sideAction',[.035,.06,.22],[1.655,.105,.25],orange,.006);
  screws(root,[[-1.54,.20,-.48],[1.54,.20,-.48],[-1.54,.20,.48],[1.54,.20,.48]],mats.metal,.016);
  box(root,'console.rearPorts',[.55,.07,.025],[.65,.09,-.592],mats.dark,.008);
  return root;

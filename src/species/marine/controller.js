@@ -2,7 +2,6 @@ import {SPECIES,MARINE_SCREEN_IDS} from './state.js';
 import {createMarineAudio} from './audio.js';
 import {bindMarineGestures} from './gestures.js';
 import {createRemoteChannel} from '../../remote-channel.js';
-import '../../hardware-console.css';
 const pinnedSession=new URLSearchParams(location.search).get('target');let targetSession=pinnedSession,newestViews=0;
 const $=s=>document.querySelector(s),channels=new Map(MARINE_SCREEN_IDS.map(id=>[id,true]));let species='jelly',last=0,selected='screen.upper_right',contactMode=false,lastViews=0;const audio=createMarineAudio();let request=0,micOn=false;
 const send=message=>{remote.sendControl({...message,...(targetSession?{targetSession}:{})});$('#marine-status').textContent='Command sent / waiting for display';};

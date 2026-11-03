@@ -11,21 +11,21 @@ export function createMarinePanel({marine,audio}) {
  element.id='marine-species-panel';element.hidden=true;
  element.setAttribute('aria-label','MARINE SPECIES Marine echo terminal');
  element.innerHTML=`
- <header class="air-heading"><div><small>LIVING STUDY / SP–02</small><h2>MARINE SPECIES</h2></div><span class="air-indicator" aria-hidden="true"></span></header>
- <div class="marine-channel"><span>FOUR LINKED VIEWS</span><b data-channel></b></div>
- <a class="air-open-focus" href="./marine.html">OPEN FOUR VIEWS <span aria-hidden="true">↗</span></a>
+ <header class="air-heading"><div><small>SP–02 / LIVING STUDY</small><h2>MARINE SPECIES</h2></div><span class="air-indicator" aria-hidden="true"></span></header>
+ <div class="marine-channel"><span>ACTIVE VIEW</span><b data-channel></b></div>
+ <a class="air-open-focus" href="./marine.html">OPEN VIEWS <span aria-hidden="true">↗</span></a>
 
  <div class="marine-state"><i aria-hidden="true"></i><strong data-phase role="status"></strong><span data-species></span></div>
  <canvas width="448" height="104" data-wave aria-label="Live audio waveform"></canvas>
- <label class="marine-volume">Level <meter min="0" max="0.15" value="0" aria-label="Live microphone level"></meter><output data-volume>0%</output></label>
- <div class="marine-pad-heading"><span>VIEW FIELD</span><span>ORBIT / CONTACT</span></div><div data-marine-pad tabindex="0" role="group" aria-label="Marine orbit and contact touchpad"><span class="instrument-pad-target" aria-hidden="true"></span></div><p class="instrument-pad-help">DRAG TO ORBIT · SHIFT + DRAG TO TOUCH<br>SCROLL OR PINCH TO ZOOM</p><label class="marine-range">ZOOM<input data-zoom type="range" min="0.55" max="2.2" step="0.01" value="1" aria-label="Marine zoom"></label><button data-reset-view type="button">RESET VIEW</button>
- <label class="marine-range">TRIGGER LEVEL <output data-sensitivity></output><input type="range" min="0.005" max="0.12" step="0.001" value="0.018" aria-label="Sound trigger threshold; lower is more sensitive"></label>
- <label class="marine-range">HOLD TIME <output data-hold></output><input type="range" min="0.04" max="1.5" step="0.01" value="0.06" aria-label="Call duration"></label>
- <div class="marine-actions"><button type="button" data-mic>ENABLE MIC</button><button type="button" data-input-done>DONE / END INPUT</button><button type="button" data-stop>STOP</button></div>
+ <label class="marine-volume">LEVEL <meter min="0" max="0.15" value="0" aria-label="Live microphone level"></meter><output data-volume>0%</output></label>
+ <div class="marine-pad-heading"><span>VIEW</span><span>ORBIT / TOUCH</span></div><div data-marine-pad tabindex="0" role="group" aria-label="Marine orbit and contact touchpad"><span class="instrument-pad-target" aria-hidden="true"></span></div><p class="instrument-pad-help">DRAG / ORBIT · SHIFT / TOUCH</p><label class="marine-range">ZOOM<input data-zoom type="range" min="0.55" max="2.2" step="0.01" value="1" aria-label="Marine zoom"></label><button data-reset-view type="button">RESET VIEW</button>
+ <label class="marine-range">TRIGGER <output data-sensitivity></output><input type="range" min="0.005" max="0.12" step="0.001" value="0.018" aria-label="Sound trigger threshold; lower is more sensitive"></label>
+ <label class="marine-range">HOLD <output data-hold></output><input type="range" min="0.04" max="1.5" step="0.01" value="0.06" aria-label="Call duration"></label>
+ <div class="marine-actions"><button type="button" data-mic>ENABLE MIC</button><button type="button" data-input-done>DONE</button><button type="button" data-stop>STOP</button></div>
  <label class="marine-range">SPECIMEN<select data-visitor aria-label="Marine specimen for simulated calls"><option value="auto">Random specimen</option>${Object.entries(SPECIES).map(([id,s])=>`<option value="${id}">${s.name}</option>`).join('')}</select></label>
  <button type="button" data-call>SIMULATE CALL <span aria-hidden="true">↗</span></button>
  <p class="marine-permission" data-permission role="status"></p>
- <p class="marine-privacy">LOCAL LEVEL ANALYSIS ONLY. NO RECORDING OR UPLOADS. LEAVING RELEASES THE MICROPHONE.</p>
+ <p class="marine-privacy">LOCAL LEVEL ONLY · NO RECORDING / UPLOAD</p>
  <span data-count hidden>00</span>`;
  document.body.append(element);
  element.querySelectorAll('output').forEach(node=>node.setAttribute('aria-live','off'));
@@ -76,7 +76,7 @@ export function createMarinePanel({marine,audio}) {
   if(lastPhase!==s.phase+audio.status+s.inspecting){phase.textContent=s.inspecting?'Inspecting':s.phase==='LISTENING'&&!active?'Ready / simulate call':PHASES[s.phase];lastPhase=s.phase+audio.status+s.inspecting;}
   if(document.activeElement!==find('[data-zoom]'))find('[data-zoom]').value=s.view.zoom;
   species.textContent=SPECIES[s.species]?.name||s.species;element.dataset.phase=s.phase;
-  const indexOnly=s.selectedScreen==='screen.right.03',locked=s.selectedScreen==='screen.right.01'||indexOnly;find('[data-zoom]').disabled=indexOnly;find('[data-reset-view]').disabled=indexOnly;find('[data-marine-pad]').classList.toggle('rotation-locked',locked);find('.instrument-pad-help').innerHTML=indexOnly?'SPECIMEN INDEX · SELECT ONLY':locked?'FIXED ORIENTATION · SOUND RESPONSE<br>SCROLL OR PINCH TO ZOOM':'DRAG TO ORBIT · SHIFT + DRAG TO TOUCH<br>SCROLL OR PINCH TO ZOOM';
+  const indexOnly=s.selectedScreen==='screen.right.03',locked=s.selectedScreen==='screen.right.01'||indexOnly;find('[data-zoom]').disabled=indexOnly;find('[data-reset-view]').disabled=indexOnly;find('[data-marine-pad]').classList.toggle('rotation-locked',locked);find('.instrument-pad-help').textContent=indexOnly?'SELECT ONLY':locked?'FIXED VIEW / SOUND RESPONSE':'DRAG / ORBIT · SHIFT / TOUCH';
   if(lastStatus!==audio.message){permission.textContent=audio.message;lastStatus=audio.message;}
   mic.textContent=pending?'CANCEL REQUEST':active?'STOP MIC':'ENABLE MIC';
   mic.disabled=busy&&!active&&!pending;find('[data-input-done]').disabled=!active&&!pending;

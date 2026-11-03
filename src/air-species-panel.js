@@ -18,26 +18,26 @@ export function createAirSpeciesPanel({flight, onReset}) {
   element.setAttribute('aria-label', 'AIR SPECIES Flight and morph controls');
   element.innerHTML = `
     <header class="air-heading">
-      <div><small>LIVING STUDY / SP–01</small><h2>AIR SPECIES</h2></div>
+      <div><small>SP–01 / LIVING STUDY</small><h2>AIR SPECIES</h2></div>
       <span class="air-indicator" aria-hidden="true"></span>
     </header>
-    <div class="air-channel"><span>FOUR LINKED VIEWS</span><strong data-air-channel></strong></div>
-    <a class="air-open-focus" href="./air.html">OPEN FOUR VIEWS <span aria-hidden="true">↗</span></a>
-    <div class="air-pad-heading"><span>FLIGHT FIELD</span><span>POSITION / ALTITUDE</span></div>
+    <div class="air-channel"><span>ACTIVE VIEW</span><strong data-air-channel></strong></div>
+    <a class="air-open-focus" href="./air.html">OPEN VIEWS <span aria-hidden="true">↗</span></a>
+    <div class="air-pad-heading"><span>FLIGHT</span><span>X / Y</span></div>
     <div class="air-xy-pad" data-air-pad="flight" tabindex="0" role="group" aria-label="Flight pad: horizontal movement changes position; vertical movement changes altitude" aria-describedby="air-pad-help">
       <span class="air-axis air-axis-x" aria-hidden="true"></span><span class="air-axis air-axis-y" aria-hidden="true"></span>
       <span class="air-pad-label air-pad-top" aria-hidden="true">RISE</span><span class="air-pad-label air-pad-bottom" aria-hidden="true">DESCEND</span>
       <span class="air-pad-position" aria-hidden="true"></span><span class="air-pad-target" aria-hidden="true"></span>
     </div>
     <div class="air-coordinates"><span>X <output data-air-x>+0.00</output></span><span>Y <output data-air-y>+0.00</output></span><span data-air-behaviour>Floating</span></div>
-    <div class="air-pad-heading air-morph-heading"><span>MORPH FIELD</span><span>Attraction and flow</span></div>
+    <div class="air-pad-heading air-morph-heading"><span>MORPH</span><span>ATTRACTION</span></div>
     <div class="air-xy-pad air-field-pad" data-air-pad="field" tabindex="0" role="group" aria-label="Morph pad: move the attraction field to affect fibres and fluid" aria-describedby="air-field-help air-pad-help">
       <span class="air-axis air-axis-x" aria-hidden="true"></span><span class="air-axis air-axis-y" aria-hidden="true"></span>
       <span class="air-field-influence" aria-hidden="true"></span>
       <span class="air-pad-position" aria-hidden="true"></span><span class="air-pad-target" aria-hidden="true"></span>
     </div>
-    <div class="air-field-meta"><span data-air-field-status>Waiting for touch</span><span>Attraction <output data-air-field-strength>0%</output></span></div>
-    <p id="air-field-help">HOLD TO GATHER · DRAG TO PULL<br>RELEASE TO RELAX</p>
+    <div class="air-field-meta"><span data-air-field-status>Ready</span><span>FIELD <output data-air-field-strength>0%</output></span></div>
+    <p id="air-field-help" class="air-sr-only">Hold to gather, drag to pull and release to relax.</p>
     <p id="air-pad-help" class="air-sr-only">Use either pad or both together. Arrow keys adjust the selected pad; Home resets it. The first pad controls flight, the second controls the internal morph field.</p>
     <div class="air-parameters air-morph-parameters">
       <label><span>ATTRACTION</span><output data-air-value="attraction"></output><input type="range" min="0" max="1" step="0.01" data-air-param="attraction" aria-label="Attraction"/></label>
@@ -45,13 +45,13 @@ export function createAirSpeciesPanel({flight, onReset}) {
     </div>
     <details class="air-flight-tuning"><summary>FLIGHT TUNING</summary>
       <div class="air-parameters">
-        <label><span>Motion Response</span><output data-air-value="response"></output><input type="range" min="0" max="1" step="0.01" data-air-param="response" aria-label="Motion Response Motion response"/></label>
-        <label><span>Feather Dynamics</span><output data-air-value="feather"></output><input type="range" min="0" max="1" step="0.01" data-air-param="feather" aria-label="Feather Dynamics Fibre dynamics"/></label>
-        <label><span>Drift</span><output data-air-value="drift"></output><input type="range" min="0" max="1" step="0.01" data-air-param="drift" aria-label="Drift Drift"/></label>
+        <label><span>RESPONSE</span><output data-air-value="response"></output><input type="range" min="0" max="1" step="0.01" data-air-param="response" aria-label="Motion Response Motion response"/></label>
+        <label><span>FEATHER</span><output data-air-value="feather"></output><input type="range" min="0" max="1" step="0.01" data-air-param="feather" aria-label="Feather Dynamics Fibre dynamics"/></label>
+        <label><span>DRIFT</span><output data-air-value="drift"></output><input type="range" min="0" max="1" step="0.01" data-air-param="drift" aria-label="Drift Drift"/></label>
       </div>
-      <div class="air-speed">FLIGHT SPEED <output data-air-speed>0.00</output></div>
+      <div class="air-speed">SPEED <output data-air-speed>0.00</output></div>
     </details>
-    <button type="button" class="air-reset">Reset Flight <span aria-hidden="true">↺</span></button>
+    <button type="button" class="air-reset">RESET <span aria-hidden="true">↺</span></button>
   `;
   document.body.append(element);
   element.querySelectorAll('output').forEach(output => output.setAttribute('aria-live', 'off'));

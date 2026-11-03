@@ -16,7 +16,7 @@ export function createEditor({specs,store,onTransform,onDisplay,onMode,onUpload,
  const THREE_RAD_TO_DEG=180/Math.PI;
  function show(id,label){
   selected=id;panel.hidden=!id;if(!id)return;name.textContent=label||id;sync();
-  const state=store.snapshot();say(state.screens[id]?'TRANSFORMS AND DISPLAY SETTINGS AUTO-SAVE.':state.hardware[id]?'Changing an angle does not require changing position.':'This object supports inspection only.');
+  const state=store.snapshot();say(state.screens[id]?'AUTO-SAVE / ON':state.hardware[id]?'ANGLE ONLY / POSITION LOCKED':'INSPECTION ONLY');
  }
  function rotationChanged(){
   if(!selected)return;const rotation=[];
