@@ -8,7 +8,7 @@ export function createMarineOptics({scanMap}={}){
  void main(){
  vec2 uv=vUv;vec3 col=texture2D(source,uv).rgb;vec3 light=vec3(0.);
  for(int i=0;i<12;i++){float a=float(i)*2.39996;float r=2.+sqrt(float(i))*3.3;vec3 s=texture2D(source,uv+vec2(cos(a),sin(a))*pixel*r).rgb;float l=dot(s,vec3(.2126,.7152,.0722));light+=s*smoothstep(.22,.75,l)*exp(-r*r/180.)/5.8;}
- col+=light*.45;
+ col+=light*.65;
  vec2 cellSize=vec2(12.,16.);vec2 cell=floor(gl_FragCoord.xy/cellSize);vec2 center=(cell+.5)*cellSize*pixel;
  vec3 sampleColor=texture2D(source,center).rgb;float luminance=dot(sampleColor,vec3(.2126,.7152,.0722));
  float mask=smoothstep(.065,.22,luminance);
@@ -18,7 +18,7 @@ export function createMarineOptics({scanMap}={}){
  float ink=glyph*mask*cluster*.72;
  col+=vec3(.12,.46,.85)*mask*cluster*.09;col=mix(col,mix(vec3(.36,.78,1.),vec3(1.,.77,.73),hash(cell)*.55),ink);
  float paperTile=step(.985,region)*mask*.12;col=mix(col,vec3(.5,.72,.95),paperTile);
- col=mix(vec3(dot(col,vec3(.2126,.7152,.0722))),col,1.18);
+ col=mix(vec3(dot(col,vec3(.2126,.7152,.0722))),col,.72);
  col*=.94+.06*sin(gl_FragCoord.y*3.14159);
  col=floor(col*128.+hash(gl_FragCoord.xy)*.22)/128.;
  col*=1.-.23*pow(length((uv-.5)*1.3),2.);

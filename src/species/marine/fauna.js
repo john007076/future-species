@@ -8,17 +8,17 @@ const mix = (a, b, t) => a + (b - a) * t;
 // All anatomy shares the same deformation field, so skeletons stay inside their membranes.
 export function createMarineFauna({scene, keep, glass, pink, chrome, brass, dark, organ, board}) {
   const specimens = {};
-  const palettes = {whale: 0x208bc5, shark: 0x18b7a2, angelfish: 0x9b59d1, butterflyfish: 0xf2a51c, tang: 0xe35b7d, algae: 0x36b879};
+  const palettes = {whale: 0x7399a2, shark: 0x7da795, angelfish: 0xa99bb6, butterflyfish: 0xb5a17a, tang: 0xb18c99, algae: 0x91b2a2};
   function specimen(name) {
     const root = new THREE.Group(); root.name = `marine.${name}`; scene.add(root); specimens[name] = root;
-    const skin = keep(glass.clone()); skin.color.set(palettes[name]).lerp(new THREE.Color(0xd6ebe7),.12); skin.transmission = .84; skin.thickness = .085; skin.attenuationColor.set(palettes[name]); skin.attenuationDistance = 1.8; skin.roughness = .16; skin.clearcoat = .1;skin.emissive.set(palettes[name]);skin.emissiveIntensity=.07;
-    const fin = keep(skin.clone()); fin.side = THREE.DoubleSide; fin.color.lerp(new THREE.Color(0xd6e1dc), .18); fin.transmission = .82; fin.thickness = .018; fin.attenuationDistance = .72; fin.roughness = .24;fin.emissiveIntensity=.18;fin.iridescence=.3;fin.iridescenceIOR=1.32;fin.iridescenceThicknessRange=[160,340];
-    const glow = keep(organ.clone()); glow.color.set(palettes[name]); glow.emissive.set(palettes[name]); glow.emissiveIntensity = .42; glow.transmission = 0; glow.roughness = .3;glow.iridescence=.22;glow.iridescenceIOR=1.32; glow.bumpMap = glass.bumpMap; glow.bumpScale = .018;
-    const indicator=keep(new THREE.MeshStandardMaterial({color:0xe2e9d8,emissive:palettes[name],emissiveIntensity:1.2,roughness:.45}));
-    const tracer = keep(new THREE.MeshStandardMaterial({color: palettes[name], emissive: palettes[name], emissiveIntensity: .26, roughness: .4, metalness: .18}));
-    const vein = keep(new THREE.MeshStandardMaterial({color: new THREE.Color(palettes[name]).multiplyScalar(.42), emissive: palettes[name], emissiveIntensity: .06, roughness: .5, metalness: .22}));
-    const tissueLight = new THREE.PointLight(palettes[name], .65, 3.2, 2); tissueLight.position.set(-.25, .02, .08); root.add(tissueLight);
-    for(const x of [-.7,.65]){const lamp=new THREE.PointLight(palettes[name],.38,1.1,2);lamp.position.set(x,.04,.03);root.add(lamp);}
+    const skin = keep(glass.clone()); skin.color.set(palettes[name]).lerp(new THREE.Color(0xd6ebe7),.35); skin.transmission = .98; skin.thickness = .085; skin.attenuationColor.set(palettes[name]); skin.attenuationDistance = 2.5; skin.roughness = .14; skin.clearcoat = .06;skin.emissive.set(palettes[name]);skin.emissiveIntensity=.025;
+    const fin = keep(skin.clone()); fin.side = THREE.DoubleSide; fin.color.lerp(new THREE.Color(0xd6e1dc), .42); fin.transmission = .94; fin.thickness = .012; fin.attenuationDistance = .72; fin.roughness = .25;fin.emissiveIntensity=.12;fin.iridescence=.24;fin.iridescenceIOR=1.32;fin.iridescenceThicknessRange=[160,340];
+    const glow = keep(organ.clone()); glow.color.set(palettes[name]).lerp(new THREE.Color(0x9edfd1),.4); glow.emissive.set(palettes[name]); glow.emissiveIntensity = .3; glow.transmission = 0; glow.roughness = .32;glow.iridescence=.18;glow.iridescenceIOR=1.32; glow.bumpMap = glass.bumpMap; glow.bumpScale = .018;
+    const indicator=keep(new THREE.MeshStandardMaterial({color:0xc1d4bb,emissive:palettes[name],emissiveIntensity:1.05,roughness:.45}));
+    const tracer = keep(new THREE.MeshStandardMaterial({color: palettes[name], emissive: palettes[name], emissiveIntensity: .18, roughness: .43, metalness: .18}));
+    const vein = keep(new THREE.MeshStandardMaterial({color: new THREE.Color(palettes[name]).multiplyScalar(.48), emissive: palettes[name], emissiveIntensity: .035, roughness: .5, metalness: .22}));
+    const tissueLight = new THREE.PointLight(palettes[name], .45, 3.2, 2); tissueLight.position.set(-.25, .02, .08); root.add(tissueLight);
+    for(const x of [-.7,.65]){const lamp=new THREE.PointLight(palettes[name],.28,1.1,2);lamp.position.set(x,.04,.03);root.add(lamp);}
     const parts = [];
     function mesh(geometry, material, flutter = 0) {
       keep(geometry); const object = new THREE.Mesh(geometry, material); root.add(object);

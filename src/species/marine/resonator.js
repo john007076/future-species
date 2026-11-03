@@ -9,11 +9,11 @@ export function createMarineResonator(){
  const scene=new THREE.Scene(),water=createDepthEnvironment();scene.add(water.mesh);
  const camera=new THREE.PerspectiveCamera(35,800/728,.1,80);camera.position.set(0,0,4.3);
  const count=22000,positions=new Float32Array(count*3),seeds=new Float32Array(count),accents=new Float32Array(count),colors=new Float32Array(count*3);
- const palette=[0x26c6da,0xf2b735,0xf06c9f,0x4aa8ff,0x35d0a5,0xa876e8,0xffc857,0xef6c87,0x65d5bd].map(c=>new THREE.Color(c));
+ const palette=[0x9fcaca,0xc3caa0,0xc5a3b1,0x8ab5c8,0x87aaa5,0xb1a0c4,0xd5ba83,0xc591aa,0xa1c5b5].map(c=>new THREE.Color(c));
  for(let i=0;i<count;i++){
   const seed=((Math.sin(i*127.1+3.7)*43758.5453)%1+1)%1,y=1-2*(i+.5)/count,a=i*2.399963,r=Math.sqrt(1-y*y),radius=.68+.32*Math.pow(seed,.28);
   positions.set([Math.cos(a)*r*radius,y*radius,Math.sin(a)*r*radius],i*3);seeds[i]=seed;accents[i]=i%5===0&&seed>.82?1:0;
-  const color=i%5===0?palette[i%9]:new THREE.Color(0x77cfe0);colors.set([color.r,color.g,color.b],i*3);
+  const color=i%5===0?palette[i%9]:new THREE.Color(0xd8e3e7);colors.set([color.r,color.g,color.b],i*3);
  }
  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));geometry.setAttribute('seed',new THREE.BufferAttribute(seeds,1));geometry.setAttribute('accent',new THREE.BufferAttribute(accents,1));geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
  const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,vertexColors:true,uniforms:{time:{value:0},energy:{value:0},influence:{value:0},contact:{value:new THREE.Vector3()}},vertexShader:`
