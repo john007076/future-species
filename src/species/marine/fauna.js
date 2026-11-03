@@ -14,11 +14,16 @@ export function createMarineFauna({scene, keep, glass, pink, chrome, brass, dark
     const skin = keep(glass.clone()); skin.color.set(palettes[name]).lerp(new THREE.Color(0xd6ebe7),.35); skin.transmission = .98; skin.thickness = .085; skin.attenuationColor.set(palettes[name]); skin.attenuationDistance = 2.5; skin.roughness = .14; skin.clearcoat = .06;skin.emissive.set(palettes[name]);skin.emissiveIntensity=.025;
     const fin = keep(skin.clone()); fin.side = THREE.DoubleSide; fin.color.lerp(new THREE.Color(0xd6e1dc), .42); fin.transmission = .94; fin.thickness = .012; fin.attenuationDistance = .72; fin.roughness = .25;fin.emissiveIntensity=.12;fin.iridescence=.24;fin.iridescenceIOR=1.32;fin.iridescenceThicknessRange=[160,340];
     const glow = keep(organ.clone()); glow.color.set(palettes[name]).lerp(new THREE.Color(0x9edfd1),.4); glow.emissive.set(palettes[name]); glow.emissiveIntensity = .3; glow.transmission = 0; glow.roughness = .32;glow.iridescence=.18;glow.iridescenceIOR=1.32; glow.bumpMap = glass.bumpMap; glow.bumpScale = .018;
-    const indicator=keep(new THREE.MeshStandardMaterial({color:0xc1d4bb,emissive:palettes[name],emissiveIntensity:1.05,roughness:.45}));
-    const tracer = keep(new THREE.MeshStandardMaterial({color: palettes[name], emissive: palettes[name], emissiveIntensity: .18, roughness: .43, metalness: .18}));
-    const vein = keep(new THREE.MeshStandardMaterial({color: new THREE.Color(palettes[name]).multiplyScalar(.48), emissive: palettes[name], emissiveIntensity: .035, roughness: .5, metalness: .22}));
-    const tissueLight = new THREE.PointLight(palettes[name], .45, 3.2, 2); tissueLight.position.set(-.25, .02, .08); root.add(tissueLight);
-    for(const x of [-.7,.65]){const lamp=new THREE.PointLight(palettes[name],.28,1.1,2);lamp.position.set(x,.04,.03);root.add(lamp);}
+    const indicator=keep(new THREE.MeshStandardMaterial({color:0xc1d4bb,emissive:palettes[name],emissiveIntensity:1.65,roughness:.45}));
+    const tracer = keep(new THREE.MeshStandardMaterial({color: palettes[name], emissive: palettes[name], emissiveIntensity: .28, roughness: .43, metalness: .18}));
+    const vein = keep(new THREE.MeshStandardMaterial({color: new THREE.Color(palettes[name]).multiplyScalar(.48), emissive: palettes[name], emissiveIntensity: .055, roughness: .5, metalness: .22}));
+    const tissueLight = new THREE.PointLight(palettes[name], .55, 3.2, 2); tissueLight.position.set(-.25, .02, .08); root.add(tissueLight);
+    for(const x of [-.7,.65]){const lamp=new THREE.PointLight(palettes[name],.34,1.1,2);lamp.position.set(x,.04,.03);root.add(lamp);}
+    const motePositions=new Float32Array(42*3);
+    for(let i=0;i<42;i++){const a=Math.sin(i*127.1+name.length*31.7)*43758.5453,b=Math.sin(i*269.5+17.3)*19341.137,c=Math.sin(i*83.7+51.9)*27531.853,random=v=>v-Math.floor(v);motePositions.set([(random(a)-.5)*2.8,(random(b)-.5)*1.2,(random(c)-.5)*.65],i*3);}
+    const moteGeometry=keep(new THREE.BufferGeometry());moteGeometry.setAttribute('position',new THREE.BufferAttribute(motePositions,3));
+    const moteMaterial=keep(new THREE.PointsMaterial({color:palettes[name],size:.026,transparent:true,opacity:.42,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}));
+    const motes=new THREE.Points(moteGeometry,moteMaterial);motes.name=`marine.${name}.bioluminescence`;root.add(motes);
     const parts = [];
     function mesh(geometry, material, flutter = 0) {
       keep(geometry); const object = new THREE.Mesh(geometry, material); root.add(object);
@@ -97,9 +102,10 @@ export function createMarineFauna({scene, keep, glass, pink, chrome, brass, dark
       const escaping = state.phase === 'ESCAPE' ? clamp((state.phaseTime || 0) * 2) : 0;
       const pulse = time * speed + (state.phase === 'ESCAPE' ? (state.phaseTime || 0) * speed * 2.4 : 0);
       const amplitude = (mode === 'whale' ? .13 : .17) * (1 + escaping * 1.25);
-      glow.emissiveIntensity = .32 + Math.sin(time * .9) * .07 + (state.phase === 'ECHO' ? .34 * Math.sin(time * 5) ** 2 : 0);
-      tracer.emissiveIntensity = .16 + Math.sin(time * .7 + 1) * .04;
-      tissueLight.intensity = .45 + (state.phase === 'ECHO' ? .18 * Math.sin(time * 4) ** 2 : 0);
+      glow.emissiveIntensity = .38 + Math.sin(time * .9) * .07 + (state.phase === 'ECHO' ? .34 * Math.sin(time * 5) ** 2 : 0);
+      tracer.emissiveIntensity = .22 + Math.sin(time * .7 + 1) * .04;
+      tissueLight.intensity = .55 + (state.phase === 'ECHO' ? .22 * Math.sin(time * 4) ** 2 : 0);
+      moteMaterial.opacity=.34+Math.sin(time*1.4+name.length)*.1+(state.phase==='ECHO'?.16:0);motes.rotation.y=Math.sin(time*.16)*.035;
       for (const {object, rest, flutter} of parts) {
         const positions = object.geometry.attributes.position;
         for (let i = 0; i < positions.count; i++) {

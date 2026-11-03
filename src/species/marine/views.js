@@ -406,9 +406,9 @@ export function createMarineViews({renderer}) {
   for(const [id,root] of Object.entries(specimens)){
     if(!['jelly','fish','mollusc'].includes(id))continue;
     const color=id==='jelly'?0x9fcaca:id==='fish'?0xc3caa0:0xc5a3b1;
-    const signalMaterial=standard({color,emissive:color,emissiveIntensity:.65,roughness:.45});
+    const signalMaterial=standard({color,emissive:color,emissiveIntensity:.85,roughness:.45});
     const points=id==='jelly'?[[0,.7,.12],[.24,.46,.08],[-.24,.46,.08]]:[[-.8,.1,.08],[0,.12,.07],[.7,.06,.03]];
-    points.forEach(([x,y,z],i)=>{const light=new THREE.PointLight(color,.45,1.5,2);light.position.set(x,y,z);root.add(light);sphere(root,[x,y,z],[.025,.055,.023],signalMaterial,12);});
+    points.forEach(([x,y,z],i)=>{const light=new THREE.PointLight(color,.65,1.5,2);light.position.set(x,y,z);root.add(light);sphere(root,[x,y,z],[.025,.055,.023],signalMaterial,12);});
   }
 
   // Fibres follow each existing membrane's own triangles, rather than a generic outer cage.
@@ -437,7 +437,7 @@ export function createMarineViews({renderer}) {
   const tissueGlows=new Map();
   Object.entries(specimens).forEach(([id,root],i)=>{
     const points=id==='jelly'?[[0,.6,.08],[.2,.27,.08],[-.2,.2,.08]]:id==='algae'?[[.1,-.7,0],[.23,.3,0],[-.12,.85,0]]:[[-.8,.12,.05],[0,.04,.05],[.6,.04,.03]];
-    const mat=keep(new THREE.SpriteMaterial({map:glowTexture,color:glowColors[i],opacity:.2,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,depthTest:false,toneMapped:false}));
+    const mat=keep(new THREE.SpriteMaterial({map:glowTexture,color:glowColors[i],opacity:.32,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,depthTest:false,toneMapped:false}));
     tissueGlows.set(id,mat);
     points.forEach(p=>{const glow=new THREE.Sprite(mat);glow.position.set(...p);glow.scale.set(.5,.7,1);root.add(glow);});
   });
