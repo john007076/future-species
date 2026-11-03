@@ -6,7 +6,7 @@
 .air-document-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .air-document-heading h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -.025em; }
 .air-document-heading nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
-.air-document-heading a, .air-document-heading button { padding: 8px 11px; color: #30372f; border: 1px solid #adb3a7; border-radius: 5px; background: linear-gradient(#f6f5ed, #d8dad0); box-shadow: 0 2px 0 #9da397; font: 9px Arial, sans-serif; text-decoration: none; cursor: pointer; }
+.air-document-heading a, .air-document-heading button { padding: 8px 11px; color: #30372f; border: 1px solid #adb3a7; border-radius: 1px; background: linear-gradient(#f6f5ed, #d8dad0); box-shadow: 0 2px 0 #9da397; font: 9px Arial, sans-serif; text-decoration: none; cursor: pointer; }
 pre { white-space: pre-wrap; }
 #air-diagnostics { margin: 20px 0 10px; padding: 13px 15px; color: #d8e2d2; border: 1px solid #111815; border-radius: 6px; background: #17201d; font-size: 9px; line-height: 1.65; }
 #air-performance { color: #687168; font-size: 9px; }

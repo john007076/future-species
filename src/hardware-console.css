@@ -16,8 +16,8 @@ body :is(#selection, #air-species-panel, #marine-species-panel, #controls, #util
   color-scheme: light;
   color: var(--instrument-ink);
   border: 1px solid #faf8ee;
-  border-radius: 10px;
-  background: linear-gradient(145deg, #efeee6f5, #dcded4f5);
+  border-radius: 2px;
+  background: #e3e5def5;
   box-shadow: inset 0 -2px #a9ad9d55, 0 12px 30px #192d3230;
   backdrop-filter: blur(16px);
   line-height: 1.5;
@@ -35,7 +35,7 @@ body :is(#selection, #air-species-panel, #marine-species-panel, #controls, #util
   color: #edf0e5;
   border: 1px solid #111a15;
   border-left: 4px solid var(--instrument-orange);
-  border-radius: 6px;
+  border-radius: 1px;
   background: #17241e;
   box-shadow: inset 0 2px 8px #0005;
 }
@@ -76,7 +76,7 @@ body :is(#selection, #air-species-panel, #marine-species-panel, #controls, #util
 :is(#selection, #air-species-panel, #marine-species-panel) input[type=range] { height: 3px; cursor: ew-resize; }
 :is(#air-species-panel, #marine-species-panel) :is(.air-xy-pad, [data-marine-pad]) {
   border: 4px solid #b5bbac;
-  border-radius: 6px;
+  border-radius: 1px;
   background: radial-gradient(ellipse at 50% 35%, #233b30, #101d17);
   box-shadow: inset 0 3px 12px #0008, 0 1px #fff;
 }
@@ -95,7 +95,7 @@ body :is(#selection, #air-species-panel, #marine-species-panel, #controls, #util
 #utility-controls :is(button, a) {
   color: var(--instrument-ink);
   border: 1px solid #faf8ee;
-  border-radius: 6px;
+  border-radius: 1px;
   background: #e8e7dfed;
   box-shadow: 0 2px 0 #9da397, 0 5px 14px #22332a20;
 }
@@ -159,6 +159,10 @@ body :is(#selection, #air-species-panel, #marine-species-panel, #controls, #util
 [data-marine-pad].is-active .instrument-pad-target { border-color: #ff9b68 !important; box-shadow: 0 0 12px #ef5b2444; }
 [data-marine-pad].rotation-locked { cursor: default !important; }
 :is(#marine-species-panel, .marine-remote) .instrument-pad-help { margin: 7px 0 12px; color: var(--instrument-muted); font-size: 7px; line-height: 1.6; text-align: center; }
+
+#identity { color: #29302b; text-shadow: none; }
+#hint { color: #48564e; text-shadow: none; }
+#hint span { color: #68746b; }
 
 @media (max-width: 680px) {
   #selection { width: 280px; }

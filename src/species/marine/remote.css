@@ -6,7 +6,7 @@
 .marine-specimen-grid button { min-height: 68px; padding: 9px 6px; }
 .marine-specimen-grid small { display: block; margin-bottom: 7px; font-size: 7px; opacity: .65; }
 .marine-specimen-grid button.active { color: #fff7eb; border-color: #c7481b; background: linear-gradient(#fa6c30, #df4919); box-shadow: 0 3px 0 var(--orange-dark); }
-.marine-remote [data-marine-pad] { position: relative; display: block; width: 100%; height: auto; min-height: 170px; margin-top: 17px; overflow: hidden; border: 5px solid #b8bcb2; border-radius: 6px; background: radial-gradient(ellipse at 50% 35%, #233b30, #101d17); box-shadow: inset 0 3px 12px #0008, 0 1px #fff; touch-action: none; cursor: grab; }
+.marine-remote [data-marine-pad] { position: relative; display: block; width: 100%; height: auto; min-height: 170px; margin-top: 17px; overflow: hidden; border: 5px solid #b8bcb2; border-radius: 1px; background: radial-gradient(ellipse at 50% 35%, #233b30, #101d17); box-shadow: inset 0 3px 12px #0008, 0 1px #fff; touch-action: none; cursor: grab; }
 .marine-remote [data-marine-pad]:before { content: ''; position: absolute; left: 6%; right: 6%; top: 50%; border-top: 1px solid #a8bfb748; pointer-events: none; }
 .marine-remote [data-marine-pad]:after { content: ''; position: absolute; top: 7%; bottom: 7%; left: 50%; border-left: 1px solid #a8bfb748; pointer-events: none; }
 .marine-remote .instrument-pad-target { position: absolute; left: var(--pad-x, 50%); top: var(--pad-y, 50%); z-index: 1; width: 22px; height: 22px; border: 1px solid #d8e2cfaa; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }

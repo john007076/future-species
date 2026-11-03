@@ -5,7 +5,7 @@
 .marine-document-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .marine-document-heading h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -.025em; }
 .marine-document-heading nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
-.marine-document-heading a, .marine-document-heading button { padding: 8px 10px; color: #30372f; border: 1px solid #adb3a7; border-radius: 5px; background: linear-gradient(#f6f5ed, #d8dad0); box-shadow: 0 2px 0 #9da397; font: 8px Arial, sans-serif; text-decoration: none; cursor: pointer; }
+.marine-document-heading a, .marine-document-heading button { padding: 8px 10px; color: #30372f; border: 1px solid #adb3a7; border-radius: 1px; background: linear-gradient(#f6f5ed, #d8dad0); box-shadow: 0 2px 0 #9da397; font: 8px Arial, sans-serif; text-decoration: none; cursor: pointer; }
 #marine-mic { color: #fff7eb; border-color: #bd4319; background: linear-gradient(#fa6d31, #df491a); }
 #marine-diagnostics { margin: 20px 0 10px; padding: 13px 15px; color: #d8e2d2; border: 1px solid #111815; border-radius: 6px; background: #17201d; font-size: 9px; line-height: 1.65; }
 #marine-performance, #marine-audio-status { color: #687168; font-size: 9px; }
