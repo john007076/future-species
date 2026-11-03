@@ -19,7 +19,8 @@ for(const [id,mode] of [['marine-orbit-mode',false],['marine-contact-mode',true]
 $('#marine-reset-view').addEventListener('click',()=>{send({type:'marineView',patch:{yaw:0,pitch:0,zoom:1}});send({type:'marineContact',input:{active:false}});});
 $('#marine-zoom').addEventListener('input',()=>{const zoom=Number($('#marine-zoom').value);$('#marine-zoom-out').textContent=zoom.toFixed(2)+'x';send({type:'marineView',patch:{zoom}});});
 $('#marine-toggle-channel').addEventListener('click',()=>{const enabled=!channels.get(selected);channels.set(selected,enabled);send({type:'marineChannel',id:selected,enabled});render();});
-function renderMic(){$('#marine-input-done').disabled=!['listening','requesting'].includes(audio.status);$('#marine-mic').textContent=audio.status==='requesting'?'CANCEL REQUEST':audio.status==='listening'?'STOP MICROPHONE':'ENABLE MICROPHONE';$('#marine-mic-status').textContent=audio.message;}
+let lastMicStatus='';
+function renderMic(){const status=`${audio.status}|${micOn}|${audio.message}`;if(status===lastMicStatus)return;lastMicStatus=status;$('#marine-input-done').disabled=!['listening','requesting'].includes(audio.status);$('#marine-mic').textContent=audio.status==='requesting'?'CANCEL REQUEST':audio.status==='listening'?'STOP MICROPHONE':'ENABLE MICROPHONE';$('#marine-mic-status').textContent=audio.message;}
 function stopMic(){request++;const active=micOn||['listening','requesting'].includes(audio.status);micOn=false;audio.stop();if(active)send({type:'marineStop'});renderMic();$('#marine-level').value=0;}
 $('#marine-mic').addEventListener('click',async()=>{if(['requesting','listening'].includes(audio.status)){stopMic();return;}const token=++request,pending=audio.start();renderMic();if(await pending&&token===request){micOn=true;send({type:'marineListen'});}renderMic();});
 $('#marine-stop').addEventListener('click',stopMic);

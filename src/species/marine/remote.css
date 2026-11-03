@@ -21,7 +21,7 @@
 .marine-remote input { width: 100%; accent-color: var(--orange); }
 .marine-remote output { text-align: right; font-variant-numeric: tabular-nums; }
 .marine-remote #marine-selected { color: var(--ink); font-size: 12px; font-weight: 600; }
-.marine-remote #marine-phase { margin: 16px 0; padding: 12px; color: var(--screen-ink); border-radius: 5px; background: var(--dark); }
+.marine-remote #marine-phase { margin: 16px 0; padding: 12px; color: var(--screen-ink); border-radius: 0; background: var(--dark); }
 .marine-remote #marine-view-readout { font-variant-numeric: tabular-nums; }
 .marine-remote #marine-mic-status { min-height: 32px; margin: 13px 0; }
 .marine-remote .marine-privacy-note { padding-top: 10px; border-top: 1px solid var(--line); }
