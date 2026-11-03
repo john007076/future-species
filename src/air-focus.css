@@ -1,6 +1,6 @@
 @import './pixel-font.css';
 
-.air-focus-page { margin: 0; overflow: auto; color: #29302b; background: #d9dbd4; font: 13px/1.6 Arial, "PingFang SC", sans-serif; }
+.air-focus-page { margin: 0; overflow: auto; color: #29302b; background: #c2c9c3; font: 13px/1.6 Arial, "PingFang SC", sans-serif; }
 #air-stage { padding: 26px; }
 #air-stage:fullscreen { overflow: auto; background: #d9dbd4; }
 .air-document-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }

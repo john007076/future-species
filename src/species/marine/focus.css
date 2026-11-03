@@ -1,6 +1,6 @@
 @import '../../air-focus.css';
 
-.marine-focus { margin: 0; color: #29302b; background: #d9dbd4; font: 13px/1.6 Arial, "PingFang SC", sans-serif; }
+.marine-focus { margin: 0; color: #29302b; background: #c2c9c3; font: 13px/1.6 Arial, "PingFang SC", sans-serif; }
 #marine-stage { padding: 26px; }
 .marine-document-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .marine-document-heading h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -.025em; }
