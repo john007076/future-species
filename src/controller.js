@@ -1,8 +1,10 @@
 import {screens,displayDefaults} from './config.js';
 import {createRemoteChannel} from './remote-channel.js';
+import {syncInstrumentHeader} from './instrument-spec.js';
 import './controller.css';
 import './hardware-console.css';
 
+syncInstrumentHeader(document.querySelector('.console-shell'));
 const $=selector=>document.querySelector(selector),localScreens=Object.fromEntries(screens.map(spec=>[spec.id,{rotation:[...spec.rotation],display:{...displayDefaults}}]));
 let selected='screen.center_main',uiVisible=true,lastState=0;
 const status=message=>{$('#status').textContent=message;};

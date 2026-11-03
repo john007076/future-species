@@ -1,4 +1,5 @@
 export const AIR_SCREEN_IDS=Object.freeze(['screen.upper_left','screen.portrait_left','screen.left.02','screen.left.03']);
+export const AIR_ROTATION_LOCKED_IDS=new Set(['screen.left.02']);
 export const AIR_DEFAULTS=Object.freeze({response:.45,feather:.65,drift:.5,attraction:.72,fluidity:.65});
 
 const STEP=1/120,TRAIL_INTERVAL=1/20,GLIDE_SECONDS=3.2;
@@ -121,7 +122,7 @@ export function createAirSpeciesState(){
  function reset(){
   Object.assign(state,initialState());accumulator=0;trailElapsed=0;releaseTime=-GLIDE_SECONDS;coast={x:0,y:0};return state;
  }
- function orbitView(id,dx,dy){if(!AIR_SCREEN_IDS.includes(id))throw new TypeError('Unknown AIR view');finite(dx,'yaw');finite(dy,'pitch');const v=state.viewTransforms[id];v.yaw=Math.atan2(Math.sin(v.yaw+clamp(dx,-.5,.5)),Math.cos(v.yaw+clamp(dx,-.5,.5)));v.pitch=clamp(v.pitch+dy,-1,1);}
+ function orbitView(id,dx,dy){if(!AIR_SCREEN_IDS.includes(id))throw new TypeError('Unknown AIR view');finite(dx,'yaw');finite(dy,'pitch');if(AIR_ROTATION_LOCKED_IDS.has(id))return false;const v=state.viewTransforms[id];v.yaw=Math.atan2(Math.sin(v.yaw+clamp(dx,-.5,.5)),Math.cos(v.yaw+clamp(dx,-.5,.5)));v.pitch=clamp(v.pitch+dy,-1,1);return true;}
  function zoomView(id,factor){if(!AIR_SCREEN_IDS.includes(id))throw new TypeError('Unknown AIR view');finite(factor,'zoom');if(factor<=0)throw new RangeError('Zoom must be positive');state.viewTransforms[id].zoom=clamp(state.viewTransforms[id].zoom*factor,.55,2.2);}
  function resetView(id){if(!AIR_SCREEN_IDS.includes(id))throw new TypeError('Unknown AIR view');Object.assign(state.viewTransforms[id],{yaw:0,pitch:0,zoom:1});}
  function snapshot(){return {...state,viewTransforms:Object.fromEntries(Object.entries(state.viewTransforms).map(([id,v])=>[id,{...v}])),wind:{...state.wind},target:{...state.target},input:{...state.input},field:{...state.field,target:{...state.field.target},input:{...state.field.input}},params:{...state.params},trail:state.trail.map(point=>({...point}))};}

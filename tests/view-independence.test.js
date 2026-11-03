@@ -14,3 +14,11 @@ test('AIR view rotation projects depth coordinates instead of flattening or rota
  const p=orientAirPoint([1,0,0],{yaw:Math.PI/2,pitch:0,zoom:1});assert.ok(Math.abs(p[0])<1e-8);assert.ok(Math.abs(p[2]+1)<1e-8);
  const q=orientAirPoint([0,1,0],{yaw:0,pitch:Math.PI/2,zoom:1});assert.ok(Math.abs(q[1])<1e-8);assert.ok(Math.abs(q[2]-1)<1e-8);
 });
+
+test('AIR current rejects rotation without affecting independent views',()=>{
+ const air=createAirSpeciesState();
+ assert.equal(air.orbitView('screen.left.02',.4,.2),false);
+ assert.deepEqual(air.state.viewTransforms['screen.left.02'],{yaw:0,pitch:0,zoom:1});
+ assert.equal(air.orbitView('screen.upper_left',.4,.2),true);
+ assert.equal(air.state.viewTransforms['screen.upper_left'].yaw,.4);
+});

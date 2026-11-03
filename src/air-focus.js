@@ -1,5 +1,5 @@
 import {displayNavigationTarget} from './display-navigation.js';
-import {AIR_SCREEN_IDS,createAirSpeciesState} from './air-species-state.js';
+import {AIR_SCREEN_IDS,AIR_ROTATION_LOCKED_IDS,createAirSpeciesState} from './air-species-state.js';
 import {createAirSpeciesViews} from './air-species-views.js';
 import {createRemoteChannel} from './remote-channel.js';
 import {airTelemetry,applyAirRemoteControl} from './air-remote-protocol.js';
@@ -14,7 +14,7 @@ const fps=coarse?24:30,modeLabels={floating:'Floating',responding:'Following air
 let lastTime=null,lastFrame=-Infinity,lastTelemetry=-Infinity,lastPerfUpdate=0;
 const clamp=value=>Math.max(-1,Math.min(1,value)),figureElements=new Map();
 for(const figure of document.querySelectorAll('[data-air-view]')){
- figureElements.set(figure.dataset.airView,figure);const canvas=views.textures.get(figure.dataset.airView).image;canvas.tabIndex=0;canvas.setAttribute('aria-label',figure.querySelector('figcaption').textContent+' Live living view');figure.prepend(canvas);
+ const id=figure.dataset.airView;figure.classList.toggle('rotation-locked',AIR_ROTATION_LOCKED_IDS.has(id));figureElements.set(id,figure);const canvas=views.textures.get(id).image;canvas.tabIndex=0;canvas.setAttribute('aria-label',figure.querySelector('figcaption').textContent+(AIR_ROTATION_LOCKED_IDS.has(id)?' Fixed living view':' Live living view'));figure.prepend(canvas);
 }
 function updateText(selector,value){const element=document.querySelector(selector);if(element.textContent!==value)element.textContent=value;}
 function renderViews(){
