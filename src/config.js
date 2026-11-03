@@ -302,16 +302,16 @@ export const displayDefaults = {
 };
 
 export const sceneSettings = {
-  background:'#8d9b9c',
+  background:'#466f87',
   fog:{near:33,far:95},
   exposure:.96,
   environmentIntensity:.57,
-  hemisphere:{sky:'#dce4df',ground:'#6f746c',intensity:1.25},
-  key:{color:'#fff4e6',intensity:2.1,position:[-7,11,8]},
-  fill:{color:'#d9e4df',intensity:.85,position:[8,8,5]},
-  rim:{color:'#f2f0e7',intensity:1.1,position:[3,6,-6]},
-  floor:{color:'#879593',roughness:.72,metalness:.08},
-  grain:.014,
+  hemisphere:{sky:'#b2d3e2',ground:'#857c69',intensity:1.4},
+  key:{color:'#f3ead7',intensity:2.05,position:[-7,11,8]},
+  fill:{color:'#c4e3ef',intensity:1.1,position:[8,8,5]},
+  rim:{color:'#d5e7e8',intensity:1.25,position:[3,6,-6]},
+  floor:{color:'#517f93',roughness:.53,metalness:.12},
+  grain:.018,
   pixelRatioLimit:1.6,
 };
 

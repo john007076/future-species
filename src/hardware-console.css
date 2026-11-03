@@ -160,10 +160,6 @@ body :is(#selection, #air-species-panel, #marine-species-panel, #controls, #util
 [data-marine-pad].rotation-locked { cursor: default !important; }
 :is(#marine-species-panel, .marine-remote) .instrument-pad-help { margin: 7px 0 12px; color: var(--instrument-muted); font-size: 7px; line-height: 1.6; text-align: center; }
 
-#identity { color: #29302b; text-shadow: none; }
-#hint { color: #48564e; text-shadow: none; }
-#hint span { color: #68746b; }
-
 @media (max-width: 680px) {
   #selection { width: 280px; }
   :is(#selection, #air-species-panel, #marine-species-panel) { backdrop-filter: none; }
